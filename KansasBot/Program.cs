@@ -1,11 +1,10 @@
 ﻿using KansasBot.rsc.core;
 using KansasBot.rsc.core.data;
 
-Console.WriteLine("Hello, World!");
 try
 {
     var configLoader = new KansasConfigLoader();
-    var config = await configLoader.LoadConfig();
+    var config = await configLoader.LoadConfigAsync();
     KansasMain bot = new KansasMain(config);
     await bot.StartAsync();
     await Task.Delay(-1);

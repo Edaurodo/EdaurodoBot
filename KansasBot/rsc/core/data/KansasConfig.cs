@@ -19,7 +19,7 @@ namespace KansasBot.rsc.core.data
         public string Token { get; private set; } = "insert your bot token here";
 
         [JsonProperty("prefixes")]
-        public ImmutableArray<string> DefaultPrefixes { get; private set; } = new[] { "nana.", ">", "7" }.ToImmutableArray();
+        public ImmutableArray<string> DefaultPrefixes { get; private set; } = new[] { "!", ">" }.ToImmutableArray();
 
         [JsonProperty("message_cache_size")]
         public int MessageCacheSize { get; private set; } = 512;
@@ -31,7 +31,7 @@ namespace KansasBot.rsc.core.data
         public bool UseInteractivity { get; private set; } = true;
 
         [JsonProperty("use_commandnext")]
-        public bool UseCommandNext { get; private set; } = true;
+        public bool UseCommandNext { get; private set; } = false;
 
         [JsonProperty("mention_prefix")]
         public bool EnableMentionPrefix { get; private set; } = false;

@@ -5,6 +5,7 @@ using DSharpPlus.Interactivity.Extensions;
 using KansasBot.rsc.core.data;
 using KansasBot.rsc.modules.genericmodule.commands.info;
 using KansasBot.rsc.modules.genericmodule.commands.create;
+using KansasBot.rsc.modules.whitelistmodule;
 
 namespace KansasBot.rsc.core
 {
@@ -14,14 +15,12 @@ namespace KansasBot.rsc.core
         public DiscordClient Client { get; }
         public InteractivityExtension? InteractivityExtension { get; internal set; }
         public SlashCommandsExtension? SlashCommands { get; internal set; }
+        //public CommandsNextExtension CommandsNext { get; internal set;
 
-        //public IServiceProvider Services { get; }
-        //public CommandsNextExtension CommandsNext { get; internal set; 
+        public AllowlistModule Allowlist { get; private set; }
         public KansasMain(KansasConfig config)
         {
-
             Config = config;
-
             Client = new DiscordClient(new DiscordConfiguration()
             {
                 Token = Config.Discord.Token,
@@ -30,26 +29,15 @@ namespace KansasBot.rsc.core
                 MinimumLogLevel = Config.MinimumLogLevel,
                 Intents = DiscordIntents.All,
             });
-
-            //if (Config.Discord.UseCommandNext) { InitCommandsNext(); }
             if (Config.Discord.UseInteractivity) { InitInteractivity(); }
+
+            InitKansasModules();
         }
 
-        /*
-        private void InitCommandsNext()
+        private void InitKansasModules()
         {
-            CommandsNext = Client.UseCommandsNext(new CommandsNextConfiguration()
-            {
-                CaseSensitive = true,
-                EnableDms = false,
-                DmHelp = false,
-                EnableMentionPrefix = Config.Discord.EnableMentionPrefix,
-                StringPrefixes = Config.Discord.DefaultPrefixes,
-                Services = Services
-            });
+            Allowlist = new AllowlistModule(this);
         }
-        */
-
         private void InitInteractivity()
         {
             SlashCommands = Client.UseSlashCommands(new SlashCommandsConfiguration());
