@@ -5,22 +5,24 @@ namespace KansasBot.rsc.modules.whitelistmodule.config
 {
     public sealed class AllowListConfig
     {
+        [JsonProperty("use_allowlist_module")]
+        public bool Use { get; private set; } = true;
+
         [JsonProperty("channels_config", NullValueHandling = NullValueHandling.Include)]
         public AllowListChannel? ChannelConfig { get; private set; } = new AllowListChannel();
 
         [JsonProperty("roles_config", NullValueHandling = NullValueHandling.Include)]
         public AllowListRoles? RolesConfig { get; private set; } = new AllowListRoles();
 
+        [JsonProperty("messages", NullValueHandling = NullValueHandling.Include)]
+        public AllowlistMessages? Messages { get; private set; } = new AllowlistMessages();
+
         [JsonProperty("quests", NullValueHandling = NullValueHandling.Include)]
         public AllowListQuest[]? QuestConfig { get; private set; } = new[] {
             new AllowListQuest("Questão 1", new[] { "Alternativa 1", "Alternativa 2", "Quantas voce quiser desde que não ultrapasse 25" }, 2),
             new AllowListQuest("Questão 2", new[] { "Alternativa 1", "Alternativa 2", "Quantas voce quiser desde que não ultrapasse 25" }, 3)
         };
-
-        [JsonProperty("messages", NullValueHandling = NullValueHandling.Include)]
-        public AllowlistMessages? Messages { get; private set; } = new AllowlistMessages();
     }
-
     public sealed class AllowlistMessages
     {
         [JsonProperty("main_allowlist", NullValueHandling = NullValueHandling.Include)]

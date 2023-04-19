@@ -7,7 +7,7 @@ namespace KansasBot.rsc.modules.whitelistmodule.config
 {
     public sealed class AllowListConfigLoader
     {
-        private string ConfigPath = Path.Combine(new[] { KansasPaths.ConfigPath, "config_allowlist.cfg" });
+        private string ConfigPath = Path.Combine(new[] { KansasPaths.ConfigPath, "config_allowlist.json" });
         private DiscordClient Client;
 
         public AllowListConfigLoader(DiscordClient client)
@@ -26,7 +26,7 @@ namespace KansasBot.rsc.modules.whitelistmodule.config
                     await sw.WriteLineAsync(js);
                     await sw.FlushAsync();
                 }
-                throw new ArgumentException("O Arquivo de configuração é inválido ou inexistente!", nameof(file));
+                //throw new ArgumentException("O Arquivo de configuração é inválido ou inexistente!", nameof(file));
             }
 
             string json = "{}";
@@ -41,25 +41,25 @@ namespace KansasBot.rsc.modules.whitelistmodule.config
         {
             if (config == null)
             {
-                Client.Logger.LogWarning(new EventId(701, "AllowlistConfig"), $"Arquivo de configuração é nulo, verifique os arquivos de configuração em:\n {ConfigPath}");
+                Client.Logger.LogWarning(new EventId(702, "AllowlistConfig"), $"Arquivo de configuração é nulo, verifique os arquivos de configuração em:\n {ConfigPath}");
                 return Task.FromResult(false);
             }
 
             if (config.ChannelConfig == null || config.RolesConfig == null)
             {
-                Client.Logger.LogWarning(new EventId(702, "AllowlistConfig"), $"ChannelConfig ou RolesConfig é nulo, verifique os arquivos de configuração em:\n {ConfigPath}");
+                Client.Logger.LogWarning(new EventId(703, "AllowlistConfig"), $"ChannelConfig ou RolesConfig é nulo, verifique os arquivos de configuração em:\n {ConfigPath}");
                 return Task.FromResult(false);
             }
 
             if (config.ChannelConfig.CategoryChannelId == null || config.ChannelConfig.MainChannelId == null || config.ChannelConfig.AprovedChannelId == null || config.ChannelConfig.ReprovedChannelId == null)
             {
-                Client.Logger.LogWarning(new EventId(703, "AllowlistConfig"), $"Algum argumento em ChannelConfig é nulo, verifique os arquivos de configuração em:\n {ConfigPath}");
+                Client.Logger.LogWarning(new EventId(704, "AllowlistConfig"), $"Algum argumento em ChannelConfig é nulo, verifique os arquivos de configuração em:\n {ConfigPath}");
                 return Task.FromResult(false);
             }
 
             if (config.RolesConfig.ReaderRoleId == null || config.RolesConfig.AprovedRoleId == null || config.RolesConfig.ReprovedRoleId == null)
             {
-                Client.Logger.LogWarning(new EventId(704, "AllowlistConfig"), $"Algum argumento em RolesConfig é nulo, verifique os arquivos de configuração em:\n {ConfigPath}");
+                Client.Logger.LogWarning(new EventId(705, "AllowlistConfig"), $"Algum argumento em RolesConfig é nulo, verifique os arquivos de configuração em:\n {ConfigPath}");
                 return Task.FromResult(false);
             }
 

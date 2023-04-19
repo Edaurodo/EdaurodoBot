@@ -4,7 +4,7 @@ namespace KansasBot.rsc.core.data
 {
     public sealed class KansasConfigLoader
     {
-        private string ConfigPath = Path.Combine(new[] { KansasPaths.ConfigPath, "config_kansas.cfg" });
+        private string ConfigPath = Path.Combine(new[] { KansasPaths.ConfigPath, "config_kansas.json" });
 
         public async Task<KansasConfig> LoadConfigAsync()
         {
