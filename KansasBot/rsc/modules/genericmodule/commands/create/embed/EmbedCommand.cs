@@ -2,7 +2,6 @@
 using DSharpPlus.SlashCommands;
 using DSharpPlus;
 using Newtonsoft.Json;
-using static DSharpPlus.Entities.DiscordEmbedBuilder;
 
 namespace KansasBot.rsc.modules.genericmodule.commands.create.embed
 {
@@ -62,7 +61,20 @@ namespace KansasBot.rsc.modules.genericmodule.commands.create.embed
         }
         public async Task ExecuteAsync()
         {
-            await Context.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().AddEmbed(GetEmbed()).AddComponents(GetMainMenuComponents()).AsEphemeral(true));
+            try
+            {
+                await Context.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().AddEmbed(GetEmbed()).AddComponents(GetMainMenuComponents()).AsEphemeral(true));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(
+                    $"Message: {ex.Message}\n\n" +
+                    $"Source: {ex.Source}\n\n" +
+                    $"Inner Exception: {ex.InnerException}\n\n" +
+                    $"Target Site: {ex.TargetSite}\n\n" +
+                    $"Stack Trace: {ex.StackTrace}");
+                Console.WriteLine(ex.ToString());
+            }
         }
         private Task CaptureButtons()
         {

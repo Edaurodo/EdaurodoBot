@@ -5,7 +5,9 @@ using DSharpPlus.Interactivity.Extensions;
 using KansasBot.rsc.core.data;
 using KansasBot.rsc.modules.genericmodule.commands.info;
 using KansasBot.rsc.modules.genericmodule.commands.create;
-using KansasBot.rsc.modules.whitelistmodule;
+using Microsoft.Extensions.DependencyInjection;
+using KansasBot.rsc.modules.whitelistmodule.commands;
+using KansasBot.rsc.modules.whitelistmodule.services;
 
 namespace KansasBot.rsc.core
 {
@@ -13,11 +15,13 @@ namespace KansasBot.rsc.core
     {
         public KansasConfig Config { get; }
         public DiscordClient Client { get; }
-        public InteractivityExtension? InteractivityExtension { get; internal set; }
-        public SlashCommandsExtension? SlashCommands { get; internal set; }
+        public InteractivityExtension? InteractivityExtension { get; private set; }
+        public SlashCommandsExtension? SlashCommands { get;  set; }
+        public IServiceProvider Services { get; private set; }
+
         //public CommandsNextExtension CommandsNext { get; internal set;
 
-        public AllowlistModule Allowlist { get; private set; }
+        public AllowlistService Allowlist { get; private set; }
         public KansasMain(KansasConfig config)
         {
             Config = config;
@@ -29,24 +33,21 @@ namespace KansasBot.rsc.core
                 MinimumLogLevel = Config.MinimumLogLevel,
                 Intents = DiscordIntents.All,
             });
-            if (Config.Discord.UseInteractivity) { InitInteractivity(); }
 
-            InitKansasModules();
-        }
 
-        private void InitKansasModules()
-        {
-            Allowlist = new AllowlistModule(this);
-        }
-        private void InitInteractivity()
-        {
-            SlashCommands = Client.UseSlashCommands(new SlashCommandsConfiguration());
+            Services = new ServiceCollection()
+                .AddSingleton(new AllowlistService(this))
+                .BuildServiceProvider();
+
+            SlashCommands = Client.UseSlashCommands(new SlashCommandsConfiguration() { Services = Services });
             InteractivityExtension = Client.UseInteractivity(new InteractivityConfiguration()
             {
                 Timeout = TimeSpan.FromMinutes(3)
             });
+
             SlashCommands.RegisterCommands<CreateCommand>();
             SlashCommands.RegisterCommands<InfoCommand>();
+
         }
         public async Task<Task> StartAsync()
         {
