@@ -78,7 +78,7 @@ namespace KansasBot.rsc.modules.whitelistmodule.commands.commandclass
         {
             List<DiscordComponent> button_line = new List<DiscordComponent>() {
             new DiscordLinkButtonComponent(Module.Config.Messages.MainMessage.RuleButtonLink, "REGRAS", false, null),
-            new DiscordButtonComponent(ButtonStyle.Success, "btn_startwl", "INICIAR", false, null)
+            new DiscordButtonComponent(ButtonStyle.Success, "btn_alstartal", "INICIAR", false, null)
             };
 
             List<DiscordActionRowComponent> components_lines = new List<DiscordActionRowComponent>() {

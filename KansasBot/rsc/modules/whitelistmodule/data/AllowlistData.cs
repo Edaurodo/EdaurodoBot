@@ -11,25 +11,39 @@ namespace KansasBot.rsc.modules.whitelistmodule.data
         public string? Lore { get; private set; }
         public byte? Atempt { get; private set; }
         public int? CurrentQuestion { get; private set; }
+        public uint[]? Response { get; private set; }
+        private List<uint>? ResponseList;
         public AllowlistData (Allowlist allowlist) => this.Allowlist = allowlist;
 
-        public void IncrementCurrentQuestion()
+        public Task SubmitResponse(uint response)
         {
-            this.CurrentQuestion ??= 0;
-            this.CurrentQuestion++;
+
+            this.ResponseList ??= new List<uint>();
+            this.ResponseList.Add(response);
+            this.Response = ResponseList.ToArray();
+            return Task.CompletedTask;
         }
-        public void IncrementAtempt()
+        public Task IncrementCurrentQuestion()
+        {
+            this.CurrentQuestion ??= -1;
+            this.CurrentQuestion++;
+            return Task.CompletedTask;
+        }
+        public Task IncrementAtempt()
         {
             this.Atempt ??= 1; 
             this.Atempt++;
+            return Task.CompletedTask;
         }
-        public void SetChannel(DiscordChannel channel)
+        public Task SetChannel(DiscordChannel channel)
         {
             this.AllowListChannel = channel;
+            return Task.CompletedTask;
         }
-        public void SetMessage(DiscordMessage message)
+        public Task SetMessage(DiscordMessage message)
         {
             this.AllowListMessage = message;
+            return Task.CompletedTask;
         }
     }
 }

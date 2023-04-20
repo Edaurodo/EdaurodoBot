@@ -33,27 +33,39 @@ namespace KansasBot.rsc.modules.whitelistmodule.services
                 {
                     switch (s.Id)
                     {
-                        case "btn_startwl":
+                        case "btn_alstartal":
                             if (!Data.ContainsKey(s.Interaction.User.Id))
                             {
-                                Data.TryAdd(s.Interaction.User.Id, new AllowlistData(new Allowlist(this, s)));
-                                Data[s.Interaction.User.Id].Allowlist.ExecuteAsync();
-                                await s.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DSharpPlus.Entities.DiscordInteractionResponseBuilder().WithContent("oi").AsEphemeral(true));
+                                if (Data.TryAdd(s.Interaction.User.Id, new AllowlistData(new Allowlist(this, s))))
+                                {
+                                    await Data[s.Interaction.User.Id].Allowlist.UpdateInteraction(s.Interaction);
+                                    await Data[s.Interaction.User.Id].Allowlist.ExecuteAsync();
+                                }
                             }
                             else
                             {
+                                await Data[s.Interaction.User.Id].Allowlist.UpdateInteraction(s.Interaction);
                                 await Data[s.Interaction.User.Id].Allowlist.ExecuteAsync();
-                                await s.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DSharpPlus.Entities.DiscordInteractionResponseBuilder().WithContent("oi").AsEphemeral(true));
                             }
                             break;
-                        case "btn_startquiz":
+                        case "btn_alstartquiz":
                             if (Data.ContainsKey(s.Interaction.User.Id))
                             {
-                                Console.WriteLine("ENTROU NO IF");
                                 await Data[s.Interaction.User.Id].Allowlist.UpdateInteraction(s.Interaction);
                                 await Data[s.Interaction.User.Id].Allowlist.ExecuteQuizAsync();
                             }
-                            else { Console.WriteLine("ENTROU NO ELSE"); }
+                            break;
+                        case "btn_alopenmodal":
+                            await Data[s.Interaction.User.Id].Allowlist.UpdateInteraction(s.Interaction);
+                            await Data[s.Interaction.User.Id].Allowlist.OpenQuizModal();
+                            break;
+                        case "select_alalt":
+                            if (Data.ContainsKey(s.Interaction.User.Id))
+                            {
+                                await Data[s.Interaction.User.Id].SubmitResponse(uint.Parse(s.Values[0]));
+                                await Data[s.Interaction.User.Id].Allowlist.UpdateInteraction(s.Interaction);
+                                await Data[s.Interaction.User.Id].Allowlist.ExecuteQuizAsync();
+                            }
                             break;
                     }
                 });
