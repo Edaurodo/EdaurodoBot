@@ -83,6 +83,27 @@ namespace KansasBot.rsc.modules.whitelistmodule.services
                 return Task.CompletedTask;
             }
         }
+        private Task Modal_Submitted(DiscordClient c, ModalSubmitEventArgs s)
+        {
+            _ = Task.Run(async () =>
+            {
+                switch(s.Interaction.Data.CustomId){
+                    case "modal_Alquiz":
+                        if (Data.ContainsKey(s.Interaction.User.Id))
+                        {
+                            s.Values.TryGetValue("Alrealage", out string realage);
+                            s.Values.TryGetValue("Alrpexp", out string rpexp);
+                            s.Values.TryGetValue("Alcharname", out string charname);
+                            s.Values.TryGetValue("Alcharagee", out string charage);
+                            s.Values.TryGetValue("Alcharlore", out string charlore);
+                            await Data[s.Interaction.User.Id].SubmitUserInfo(realage, rpexp, charage, charname, charlore);
+                            await Data[s.Interaction.User.Id].Allowlist.FinalizeAllowlistAsync(true);
+                        }
+                        break;
+                }
+            });
+            return Task.CompletedTask;
+        }
         private async Task Kansas_Ready(DiscordClient sender, ReadyEventArgs args)
         {
             Console.WriteLine("\n DISPAROU O KANSAS_READY \n");
@@ -102,6 +123,7 @@ namespace KansasBot.rsc.modules.whitelistmodule.services
                     Bot.SlashCommands.RegisterCommands<AllowlistCommands>();
                     Bot.SlashCommands.RefreshCommands();
                     Bot.Client.ComponentInteractionCreated += Component_Interaction_Created;
+                    Bot.Client.ModalSubmitted += Modal_Submitted;
                     Bot.Client.Logger.LogInformation(new EventId(700, "AllowlistService"), "AllowlistModule OK;");
                 }
             }

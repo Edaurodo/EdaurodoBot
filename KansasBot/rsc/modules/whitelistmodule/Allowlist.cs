@@ -79,7 +79,7 @@ namespace KansasBot.rsc.modules.whitelistmodule
         public async Task OpenQuizModal()
         {
             await Interaction.CreateResponseAsync(InteractionResponseType.Modal, new DiscordInteractionResponseBuilder()
-                .WithCustomId("modal_alquiz")
+                .WithCustomId("modal_Alquiz")
                 .WithTitle("Formulário Kansas Roleplay")
                 .AddComponents(new TextInputComponent("Qual é a sua idade real ?", "Alrealage", "Somente números (EX: 18)", required: true, style: TextInputStyle.Short, max_length: 2))
                 .AddComponents(new TextInputComponent("Você já teve experiência com Roleplay?", "Alrpexp", "Se \"SIM\" quanto tempo?",required: true, style: TextInputStyle.Short, max_length: 10))
@@ -91,6 +91,10 @@ namespace KansasBot.rsc.modules.whitelistmodule
         {
             Interaction = interaction;
             return Task.CompletedTask;
+        }
+        public async Task FinalizeAllowlistAsync(bool approved)
+        {
+            if (approved) { } else { }
         }
         private async Task QuizFinallize()
         {
