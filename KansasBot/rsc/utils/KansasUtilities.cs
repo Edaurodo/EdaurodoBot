@@ -244,26 +244,43 @@ namespace KansasBot.rsc.utils
 
             if (embed.Fields != null)
             {
-                foreach (var field in embed.Fields)
+                if (embed.Fields.Length > 25)
                 {
-                    if (!string.IsNullOrWhiteSpace(field.Title))
+                    Application.Client.Logger.LogError(new EventId(777, "Utilities"), $"Execedeu limite de Field: Não foi possível adicionar 'embed.Fields', quantidade máxima não pode exceder 25 verifique os arquivos de configuração");
+                }
+                else
+                {
+                    int count = 0;
+                    foreach (var field in embed.Fields)
                     {
-                        if (field.Title.Length > 0)
+                        if (!string.IsNullOrWhiteSpace(field.Title))
                         {
-                            
-                        } else
-                        {
-                            if (!string.IsNullOrWhiteSpace(field.Content))
+                            if (field.Title.Length > 256)
                             {
-                                if (field.Content.Length > 0)
+                                Application.Client.Logger.LogError(new EventId(777, "Utilities"), $"Caracters limite: Não foi possível adicionar 'embed.Fields[{count}].Title', número de caracteres não pode exceder 256 verifique os arquivos de configuração");
+                            }
+                            else
+                            {
+                                if (!string.IsNullOrWhiteSpace(field.Content))
                                 {
-
+                                    if (field.Content.Length > 1024)
+                                    {
+                                        Application.Client.Logger.LogError(new EventId(777, "Utilities"), $"Caracters limite: Não foi possível adicionar 'embed.Fields[{count}].Content', número de caracteres não pode exceder 1024 verifique os arquivos de configuração");
+                                    }
+                                    else
+                                    {
+                                        if (field.Inline != null && field.Inline == true) { eb.AddField(field.Title, field.Content, true); count++; }
+                                        else { eb.AddField(field.Title, field.Content, false); count++;}
+                                    }
                                 }
                                 else
                                 {
-
+                                    Application.Client.Logger.LogError(new EventId(777, "Utilities"), $"Campo null: Não foi possível adicionar 'embed.Fields[{count}].Content', o campo não pode ser nulo verifique os arquivos de configuração");
                                 }
                             }
+                        } else
+                        {
+                            Application.Client.Logger.LogError(new EventId(777, "Utilities"), $"Campo null: Não foi possível adicionar 'embed.Fields[{count}].Title', o campo não pode ser nulo verifique os arquivos de configuração");
                         }
                     }
                 }
