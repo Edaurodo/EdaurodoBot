@@ -73,7 +73,7 @@ namespace KansasBot.rsc.modules.whitelistmodule
         public async Task ExecuteQuizAsync()
         {
             await Service.Data[User.Id].IncrementCurrentQuestion();
-            if (Service.Data[User.Id].CurrentQuestion < Service.Config.Quests.Length) { await QuizUpdateMessage(); }
+            if (Service.Data[User.Id].CurrentQuestion < Service.Config.Questions.Length) { await QuizUpdateMessage(); }
             else
             {
                 if (await QuizApproved()) { await SendFormToUser(); }
@@ -219,17 +219,17 @@ namespace KansasBot.rsc.modules.whitelistmodule
         {
             DiscordEmbedBuilder eb = new DiscordEmbedBuilder()
                .WithColor(new DiscordColor("#2B2D31"))
-               .WithTitle($"Você esta fazendo a Allowlist do Kansas Roleplay: {Service.Data[User.Id].CurrentQuestion + 1}/{Service.Config.Quests.Length}")
+               .WithTitle($"Você esta fazendo a Allowlist do Kansas Roleplay: {Service.Data[User.Id].CurrentQuestion + 1}/{Service.Config.Questions.Length}")
                .WithDescription("ㅤ");
 
             string alternatives = "ㅤ\n";
             char a = 'A';
-            foreach (string alt in Service.Config.Quests[(int)Service.Data[User.Id].CurrentQuestion].Alternatives)
+            foreach (string alt in Service.Config.Questions[(int)Service.Data[User.Id].CurrentQuestion].Alternatives)
             {
                 alternatives += $"{a} ) {alt}\nㅤ\n";
                 a++;
             }
-            eb.AddField(Service.Config.Quests[(int)Service.Data[User.Id].CurrentQuestion].QuestName, alternatives, false);
+            eb.AddField(Service.Config.Questions[(int)Service.Data[User.Id].CurrentQuestion].Question, alternatives, false);
             return eb.Build();
         }
         private DiscordSelectComponent QuizComponent()
@@ -238,7 +238,7 @@ namespace KansasBot.rsc.modules.whitelistmodule
             int i = 1;
             List<DiscordSelectComponentOption> selectOptions = new List<DiscordSelectComponentOption>();
             selectOptions.Clear();
-            foreach (string alt in Service.Config.Quests[(int)Service.Data[User.Id].CurrentQuestion].Alternatives)
+            foreach (string alt in Service.Config.Questions[(int)Service.Data[User.Id].CurrentQuestion].Alternatives)
             {
                 selectOptions.Add(new DiscordSelectComponentOption($"{a} ) {alt}", $"{i}", null, false, null));
                 i++;
@@ -248,9 +248,9 @@ namespace KansasBot.rsc.modules.whitelistmodule
         }
         private async Task<bool> QuizApproved()
         {
-            for (int i = 0; i < Service.Config.Quests.Length; i++)
+            for (int i = 0; i < Service.Config.Questions.Length; i++)
             {
-                if (Service.Data[User.Id].Response[i] != Service.Config.Quests[i].QuestCorrectResponse) { return false; }
+                if (Service.Data[User.Id].Response[i] != Service.Config.Questions[i].CorrectAnswer) { return false; }
             }
             return true;
         }

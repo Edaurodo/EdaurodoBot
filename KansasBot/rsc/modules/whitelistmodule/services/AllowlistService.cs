@@ -5,6 +5,7 @@ using KansasBot.rsc.core.data;
 using KansasBot.rsc.modules.whitelistmodule.commands;
 using KansasBot.rsc.modules.whitelistmodule.config;
 using KansasBot.rsc.modules.whitelistmodule.data;
+using KansasBot.rsc.utils;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 
@@ -13,7 +14,7 @@ namespace KansasBot.rsc.modules.whitelistmodule.services
     public sealed class AllowlistService
     {
         public KansasMain Bot { get; }
-        public AllowListConfig? Config { get; private set; }
+        public AllowlistConfig? Config { get; private set; }
         public AllowListConfigLoader? ConfigLoader { get; private set; }
 
 
@@ -133,22 +134,24 @@ namespace KansasBot.rsc.modules.whitelistmodule.services
 
             ConfigLoader = new AllowListConfigLoader(Bot.Client);
             Config = await ConfigLoader.LoadConfigAsync();
-            if (Config.Use == true)
+            if (Config != null)
             {
-                if (!await ConfigLoader.ValidateConfig(Config))
+                if (Config.Use)
                 {
-                    Bot.Client.Logger.LogWarning(new EventId(701, "AllowlistService"), "Não foi possível inicializar a AllowlistModule, verifique os arquivos de configuração e reinicie o Bot");
-                    await Bot.Client.DisconnectAsync();
-                    Bot.Client.Dispose();
-                }
-                else
-                {
+
                     Bot.SlashCommands.RegisterCommands<AllowlistCommands>();
                     Bot.SlashCommands.RefreshCommands();
                     Bot.Client.ComponentInteractionCreated += Component_Interaction_Created;
                     Bot.Client.ModalSubmitted += Modal_Submitted;
                     Bot.Client.Logger.LogInformation(new EventId(700, "AllowlistService"), "AllowlistModule OK;");
                 }
+            }
+            else
+            {
+                Bot.Client.Logger.LogCritical(new EventId(777, "AllowlistService"), $"ERRO NAS CONFIGURAÇÔES: NÃO FOI POSSIVEL ENCONTRAR O ARQUIVO'allowlist.cfg.json' EM \n{KansasPaths.ConfigPath}");
+                await Bot.Client.DisconnectAsync();
+                Bot.Client.Dispose();
+                throw new Exception();
             }
         }
     }

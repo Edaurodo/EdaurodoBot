@@ -96,7 +96,7 @@ namespace KansasBot.rsc.utils
                                 }
                                 else
                                 {
-                                    Application.Client.Logger.LogError(new EventId(777, "Utilities"), "URL Inválida: Não foi possível adicionar 'embed.Author.Url' ao 'embed.Author.Name' e 'Author.Image', verifique os arquivos de configuração");
+                                    Application.Client.Logger.LogError(new EventId(777, "Utilities"), "URL Inválida: Não foi possível adicionar 'embed.Author.Url' ao 'embed.Author.Name' e 'embed.Author.Image', verifique os arquivos de configuração");
                                     eb.WithAuthor(embed.Author.Name, null, null);
                                 }
                             }
