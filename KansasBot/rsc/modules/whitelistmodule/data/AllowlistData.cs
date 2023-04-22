@@ -8,19 +8,35 @@ namespace KansasBot.rsc.modules.whitelistmodule.data
         public Allowlist Allowlist { get; private set; }
         public DiscordChannel? AllowListChannel { get; private set; }
         public DiscordMessage? AllowListMessage { get; private set; }
+        public DateTime? StartAllowlistTime { get; private set; }
+        public DateTime? FinishAllowlistTime { get; private set; }
         public byte? Atempt { get; private set; }
         public int? CurrentQuestion { get; private set; }
         public uint[]? Response { get; private set; }
-
         public string? UserName { get; private set; }
         public string? UserAge { get; private set; }
         public string? UserExp { get; private set; }
         public string? CharAge { get; private set; }
         public string? CharName { get; private set; }
         public string? CharLore { get; private set; }
+
         public AllowlistData(Allowlist allowlist) => this.Allowlist = allowlist;
 
-
+        public Task SubmitStartAllowlist()
+        {
+            StartAllowlistTime = DateTime.Now.ToUniversalTime();
+            return Task.CompletedTask;
+        }
+        public Task SetFinishAllowlistNull()
+        {
+            FinishAllowlistTime = null;
+            return Task.CompletedTask;
+        }
+        public Task SubmitFinishAllowlist()
+        {
+            FinishAllowlistTime = DateTime.Now.ToUniversalTime();
+            return Task.CompletedTask;
+        }
         public Task SubmitRealInfo(string? username, string? userage, string? userexp)
         {
             this.UserName = username;

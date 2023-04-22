@@ -8,6 +8,8 @@ namespace KansasBot.rsc.modules.whitelistmodule.config
         [JsonProperty("use_module")]
         public bool Use { get; private set; }
 
+        [JsonProperty("reproved_wait_time_from_minutes")]
+        public int? ReprovedWaitTime { get; private set; }
 
         [JsonProperty("roles")]
         public AllowlistRoles Roles { get; private set; }
@@ -24,9 +26,10 @@ namespace KansasBot.rsc.modules.whitelistmodule.config
         [JsonProperty("messages")]
         public AllowlistMessages Messages { get; private set; }
 
-        public AllowlistConfig(bool use, AllowlistRoles roles, AllowlistChannels channels, AllowlistQuestion[]? questions, AllowlistMessages messages)
+        public AllowlistConfig(bool? use, int? reprovedwaittime,AllowlistRoles roles, AllowlistChannels channels, AllowlistQuestion[]? questions, AllowlistMessages messages)
         {
-            Use = use;
+            Use = use ?? false;
+            ReprovedWaitTime = reprovedwaittime ?? 60;
             Roles = roles;
             Channels = channels;
             Questions = questions;
@@ -80,8 +83,6 @@ namespace KansasBot.rsc.modules.whitelistmodule.config
             CorrectAnswer = correctanswer;
         }
     }
-
-
     public sealed class AllowlistMessages
     {
         [JsonProperty("main_fixed_message")]

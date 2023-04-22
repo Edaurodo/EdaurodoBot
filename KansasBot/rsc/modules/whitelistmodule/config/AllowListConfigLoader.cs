@@ -3,7 +3,6 @@ using KansasBot.rsc.modules.genericmodule.commands.create.embed;
 using KansasBot.rsc.utils;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using System.Net.Http.Headers;
 
 namespace KansasBot.rsc.modules.whitelistmodule.config
 {
@@ -25,7 +24,6 @@ namespace KansasBot.rsc.modules.whitelistmodule.config
                 throw new Exception();
             }
             else { return await DeserializeConfig(file); }
-
         }
         private async Task SerializeNewConfig(FileInfo file)
         {
@@ -33,6 +31,7 @@ namespace KansasBot.rsc.modules.whitelistmodule.config
 
             AllowlistConfig config = new AllowlistConfig(
                 use: true,
+                reprovedwaittime: 60,
                 roles: new AllowlistRoles(),
                 channels: new AllowlistChannels(),
                 questions: new AllowlistQuestion[]
@@ -40,7 +39,7 @@ namespace KansasBot.rsc.modules.whitelistmodule.config
                     new AllowlistQuestion(
                         question: "Escreva aqui sua pergunta!",
                         alternatives: new[] {
-                            "Aqui as alternaivas para sua pergunta!",
+                            "Aqui as alternativas para sua pergunta!",
                             "Cada pergunta pode conter até no maximo 25 alternativas!",
                             "As alternativas começam a contar a partir de 1!",
                             "Esta aqui é a 4ª alternativa por exemplo!"},
@@ -87,7 +86,6 @@ namespace KansasBot.rsc.modules.whitelistmodule.config
             }
             return await ValidateConfig(JsonConvert.DeserializeObject<AllowlistConfig>(json));
         }
-
         public Task<AllowlistConfig> ValidateConfig(AllowlistConfig? config)
         {
             if (config != null)
@@ -112,12 +110,12 @@ namespace KansasBot.rsc.modules.whitelistmodule.config
                                 {
                                     AllowlistConfig value = new AllowlistConfig(
                                         use: config.Use,
+                                        reprovedwaittime: config.ReprovedWaitTime,
                                         roles: config.Roles,
                                         channels: config.Channels,
                                         questions: config.Questions,
                                         messages: config.Messages
                                         );
-
                                     return Task.FromResult(value);
                                 }
                                 else { Client.Logger.LogCritical(new EventId(777, "ConfigLoader"), $"ERRO NAS CONFIGURAÇÔES: ALGUM CAMPO EM 'messages' no arquivo 'allowlist.cfg.json' É NULO!"); throw new Exception(); }

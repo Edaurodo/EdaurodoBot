@@ -26,60 +26,39 @@ namespace KansasBot.rsc.modules.whitelistmodule
         }
         public async Task ExecuteAsync()
         {
-            if (Service.Data[User.Id].Atempt == null || Service.Data[User.Id].Atempt < 3)
+            if (Service.Data[User.Id].StartAllowlistTime == null || Service.Data[User.Id].FinishAllowlistTime == null || Service.Data[User.Id].FinishAllowlistTime.Value.Subtract(DateTime.Now.ToUniversalTime()).TotalMinutes < Service.Config.ReprovedWaitTime * (-1))
             {
-                Member = await Guild.GetMemberAsync(User.Id);
-                await Service.Data[User.Id].IncrementAtempt();
-                await Service.Data[User.Id].SetChannel(await CreateChannel());
-                await Service.Data[User.Id].SetMessage(
-                await Service.Data[User.Id].AllowListChannel
-                .SendMessageAsync(new DiscordMessageBuilder()
-                .AddEmbed(new DiscordEmbedBuilder()
-                .WithColor(new DiscordColor("#2B2D31"))
-                .WithTitle("> Você está preste a iniciar a primeira etapa da Allowlist")
-                .WithDescription(
-                "ㅤ\n" +
-                "> `COMO VAI FUNCIONAR ?`\n" +
-                "A **Allowlist** é feita em 3 partes você está na primeira\n" +
-                "parte deste processo, onde você pássara por um questionário,\n" +
-                "este questionário é de múltipla escolha, se passar você\n" +
-                "terá que fornecer alguns dados sobre você e seu personagem,\n" +
-                "na segunda segunda parte deste processo!\n\n" +
-                "> `PRESTE MUITA ATENÇÃO`\n" +
-                "Prepare sua história para ter no máximo **4000 CARACTERES**, `NÃO\n" +
-                "É PERMITIDO` o envio de `LINKS` ou de `ARQUIVOS` nas respostas da\n" +
-                "sua **ALLOWLIST**, caso seja enviado a sua **ALLOWLIST** será\n" +
-                "reprovada na **HORA**.\n\n" +
-                "> `ENTÃO ESTA TUDO PRONTO ?`\n" +
-                "Se você já esta com tudo pronto e já leu todas as nossas regras,\n" +
-                "basta clicar no botão **INICIAR**\n" +
-                $"Boa sorte! <@{User.Id}>")
-                .WithFooter("📄 Sistema de Allowlist - Kansas Roleplay")
-                .Build())
-                .AddComponents(new[] { new DiscordButtonComponent(ButtonStyle.Success, "btn_AlStartQuiz", "Iniciar Allowlist", false) })));
+                if (Service.Data[User.Id].StartAllowlistTime == null)
+                {
+                    Member = await Guild.GetMemberAsync(User.Id);
+                    await CreateChannelAndSendWarnMessage();
+                    await Service.Data[User.Id].SubmitStartAllowlist();
+                    return;
+                }
+                if (Service.Data[User.Id].FinishAllowlistTime != null)
+                {
+                    Member = await Guild.GetMemberAsync(User.Id);
+                    await CreateChannelAndSendWarnMessage();
+                    await Service.Data[User.Id].SubmitStartAllowlist();
+                    await Service.Data[User.Id].SetFinishAllowlistNull();
+                    return;
+                }
 
-                await Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
-                .AddEmbed(new DiscordEmbedBuilder()
-                .WithColor(new DiscordColor("#2B2D31"))
-                .WithDescription(
-                    $"> O canal <#{Service.Data[User.Id].AllowListChannel.Id}> foi criado para você fazer sua **Allowlist**,\n" +
-                    "> a partir deste ponto você tem **15 minutos** para enviar sua **Allowlist**,\n" +
-                    "> após este tempo seu canal será **excluido** e você terá que refazer\n" +
-                    "> sua **Allowlist**, a equipe do Kansas agradece e lhe deseja boa sorte!"))
-                .AsEphemeral(true));
-            }
-            else { return; }
+                await Service.Data[User.Id].IncrementCurrentQuestion();
+
+                if (Service.Data[User.Id].CurrentQuestion < Service.Config.Questions.Length) { await QuizUpdateMessage(); }
+                else
+                {
+                    if (await QuizApproved()) { await SendFormToUser(); }
+                    else
+                    {
+                        await ShowAllowlistChannel();
+                        await Service.Data[User.Id].SubmitFinishAllowlist();
+                    }
+                }
+            } 
         }
-        public async Task ExecuteQuizAsync()
-        {
-            await Service.Data[User.Id].IncrementCurrentQuestion();
-            if (Service.Data[User.Id].CurrentQuestion < Service.Config.Questions.Length) { await QuizUpdateMessage(); }
-            else
-            {
-                if (await QuizApproved()) { await SendFormToUser(); }
-                else { }
-            }
-        }
+
         public async Task SendFormToUser()
         {
             await Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder().AddEmbed(GetEmbedModal()).AddComponents(GetComponentEmbedModal()));
@@ -143,7 +122,7 @@ namespace KansasBot.rsc.modules.whitelistmodule
             if (approved)
             {
                 await SendFormToReader();
-
+                await Service.Data[User.Id].SubmitFinishAllowlist();
                 await Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder()
                     .AddEmbed(new DiscordEmbedBuilder()
                     .WithColor(new DiscordColor("#2B2D31"))
@@ -271,14 +250,52 @@ namespace KansasBot.rsc.modules.whitelistmodule
         {
             await Guild.GetChannel((ulong)Service.Config.Channels.MainChannelId).AddOverwriteAsync(Member, Permissions.None, Permissions.AccessChannels);
         }
-        private async Task<DiscordChannel> CreateChannel()
+        private async Task ShowAllowlistChannel()
+        {
+            await Guild.GetChannel((ulong)Service.Config.Channels.MainChannelId).AddOverwriteAsync(Member, Permissions.AccessChannels, Permissions.None);
+        }
+        private async Task CreateChannelAndSendWarnMessage()
         {
             await HideAllowlistChannel();
-            return await Guild.CreateChannelAsync(
+
+            await Service.Data[User.Id].SetChannel(Guild.CreateChannelAsync(
                 name: $"allowlist-{Member.DisplayName}",
                 type: ChannelType.Text,
                 parent: Guild.GetChannel((ulong)Service.Config.Channels.CategoryChannelId),
-                overwrites: GetOverwriteChannel());
+                overwrites: GetOverwriteChannel()).GetAwaiter().GetResult().SendMessageAsync(new DiscordMessageBuilder()
+                .AddEmbed(new DiscordEmbedBuilder()
+                .WithColor(new DiscordColor("#2B2D31"))
+                .WithTitle("> Você está preste a iniciar a primeira etapa da Allowlist")
+                .WithDescription(
+                "ㅤ\n" +
+                "> `COMO VAI FUNCIONAR ?`\n" +
+                "A **Allowlist** é feita em 3 partes você está na primeira\n" +
+                "parte deste processo, onde você pássara por um questionário,\n" +
+                "este questionário é de múltipla escolha, se passar você\n" +
+                "terá que fornecer alguns dados sobre você e seu personagem,\n" +
+                "na segunda segunda parte deste processo!\n\n" +
+                "> `PRESTE MUITA ATENÇÃO`\n" +
+                "Prepare sua história para ter no máximo **4000 CARACTERES**, `NÃO\n" +
+                "É PERMITIDO` o envio de `LINKS` ou de `ARQUIVOS` nas respostas da\n" +
+                "sua **ALLOWLIST**, caso seja enviado a sua **ALLOWLIST** será\n" +
+                "reprovada na **HORA**.\n\n" +
+                "> `ENTÃO ESTA TUDO PRONTO ?`\n" +
+                "Se você já esta com tudo pronto e já leu todas as nossas regras,\n" +
+                "basta clicar no botão **INICIAR**\n" +
+                $"Boa sorte! <@{User.Id}>")
+                .WithFooter("📄 Sistema de Allowlist - Kansas Roleplay")
+                .Build())
+                .AddComponents(new[] { new DiscordButtonComponent(ButtonStyle.Success, "btn_AlStart", "Iniciar Allowlist", false) })).GetAwaiter().GetResult().Channel);
+
+
+            await Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
+                .AddEmbed(new DiscordEmbedBuilder()
+                .WithColor(new DiscordColor("#2B2D31"))
+                .WithDescription(
+                    $"> O canal <#{Service.Data[User.Id].AllowListChannel.Id}> foi criado para você fazer sua **Allowlist**,\n" +
+                    "> a partir deste ponto você tem **15 minutos** para enviar sua **Allowlist**,\n" +
+                    "> após este tempo seu canal será **excluido** e você terá que refazer\n" +
+                    "> sua **Allowlist**, a equipe do Kansas agradece e lhe deseja boa sorte!")).AsEphemeral(true));
         }
     }
 }

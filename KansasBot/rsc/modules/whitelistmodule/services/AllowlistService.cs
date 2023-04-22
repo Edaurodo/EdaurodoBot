@@ -16,10 +16,7 @@ namespace KansasBot.rsc.modules.whitelistmodule.services
         public KansasMain Bot { get; }
         public AllowlistConfig? Config { get; private set; }
         public AllowListConfigLoader? ConfigLoader { get; private set; }
-
-
         public ConcurrentDictionary<ulong, AllowlistData> Data { get; private set; }
-
         public AllowlistService(KansasMain bot)
         {
             Bot = bot;
@@ -39,7 +36,6 @@ namespace KansasBot.rsc.modules.whitelistmodule.services
                             {
                                 if (Data.TryAdd(s.Interaction.User.Id, new AllowlistData(new Allowlist(this, s))))
                                 {
-                                    await Data[s.Interaction.User.Id].Allowlist.UpdateInteraction(s.Interaction);
                                     await Data[s.Interaction.User.Id].Allowlist.ExecuteAsync();
                                 }
                             }
@@ -47,13 +43,6 @@ namespace KansasBot.rsc.modules.whitelistmodule.services
                             {
                                 await Data[s.Interaction.User.Id].Allowlist.UpdateInteraction(s.Interaction);
                                 await Data[s.Interaction.User.Id].Allowlist.ExecuteAsync();
-                            }
-                            break;
-                        case "btn_AlStartQuiz":
-                            if (Data.ContainsKey(s.Interaction.User.Id))
-                            {
-                                await Data[s.Interaction.User.Id].Allowlist.UpdateInteraction(s.Interaction);
-                                await Data[s.Interaction.User.Id].Allowlist.ExecuteQuizAsync();
                             }
                             break;
                         case "btn_openRealInfoModal":
@@ -69,7 +58,7 @@ namespace KansasBot.rsc.modules.whitelistmodule.services
                             {
                                 await Data[s.Interaction.User.Id].SubmitResponse(uint.Parse(s.Values[0]));
                                 await Data[s.Interaction.User.Id].Allowlist.UpdateInteraction(s.Interaction);
-                                await Data[s.Interaction.User.Id].Allowlist.ExecuteQuizAsync();
+                                await Data[s.Interaction.User.Id].Allowlist.ExecuteAsync();
                             }
                             break;
                     }
