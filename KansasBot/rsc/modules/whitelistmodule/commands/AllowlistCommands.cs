@@ -1,6 +1,6 @@
 ﻿using DSharpPlus;
 using DSharpPlus.SlashCommands;
-using KansasBot.rsc.modules.whitelistmodule.commands.commandclass;
+using KansasBot.rsc.modules.whitelistmodule.commands.update;
 using KansasBot.rsc.modules.whitelistmodule.services;
 
 namespace KansasBot.rsc.modules.whitelistmodule.commands
@@ -14,10 +14,17 @@ namespace KansasBot.rsc.modules.whitelistmodule.commands
             private AllowlistService Module;
             public AllowlistUpdateCommands(AllowlistService module) => Module = module;
 
-            [SlashCommand("AllowlistMessage", $"Atualiza a mensagem do canal principal da Allowlist")]
+            [SlashCommand("MainMessage", $"Atualiza a mensagem do canal que se inicia a Allowlist")]
             public async Task UpdateMainMessage(InteractionContext ctx)
             {
-                var command = new UpdateWlMessage(ctx, Module);
+                var command = new UpdateMainMessage(ctx, Module);
+                await command.ExecuteAsync();
+            }
+
+            [SlashCommand("Readers", $"Atualiza os canais dos leitores da Allowlist")]
+            public async Task UpdateReaders(InteractionContext ctx)
+            {
+                var command = new UpdateReadersChannels(ctx, Module);
                 await command.ExecuteAsync();
             }
         }

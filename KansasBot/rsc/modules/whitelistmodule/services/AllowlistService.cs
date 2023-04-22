@@ -33,7 +33,7 @@ namespace KansasBot.rsc.modules.whitelistmodule.services
                 {
                     switch (s.Id)
                     {
-                        case "btn_alstartal":
+                        case "btn_AlStart":
                             if (!Data.ContainsKey(s.Interaction.User.Id))
                             {
                                 if (Data.TryAdd(s.Interaction.User.Id, new AllowlistData(new Allowlist(this, s))))
@@ -48,18 +48,22 @@ namespace KansasBot.rsc.modules.whitelistmodule.services
                                 await Data[s.Interaction.User.Id].Allowlist.ExecuteAsync();
                             }
                             break;
-                        case "btn_alstartquiz":
+                        case "btn_AlStartQuiz":
                             if (Data.ContainsKey(s.Interaction.User.Id))
                             {
                                 await Data[s.Interaction.User.Id].Allowlist.UpdateInteraction(s.Interaction);
                                 await Data[s.Interaction.User.Id].Allowlist.ExecuteQuizAsync();
                             }
                             break;
-                        case "btn_alopenmodal":
+                        case "btn_openRealInfoModal":
                             await Data[s.Interaction.User.Id].Allowlist.UpdateInteraction(s.Interaction);
-                            await Data[s.Interaction.User.Id].Allowlist.OpenQuizModal();
+                            await Data[s.Interaction.User.Id].Allowlist.OpenRealInfoModal();
                             break;
-                        case "select_alalt":
+                        case "btn_openCharInfoModal":
+                            await Data[s.Interaction.User.Id].Allowlist.UpdateInteraction(s.Interaction);
+                            await Data[s.Interaction.User.Id].Allowlist.OpenCharInfoModal();
+                            break;
+                        case "select_AlAlternativesResponse":
                             if (Data.ContainsKey(s.Interaction.User.Id))
                             {
                                 await Data[s.Interaction.User.Id].SubmitResponse(uint.Parse(s.Values[0]));
@@ -87,19 +91,38 @@ namespace KansasBot.rsc.modules.whitelistmodule.services
         {
             _ = Task.Run(async () =>
             {
-                switch(s.Interaction.Data.CustomId){
-                    case "modal_Alquiz":
-                        if (Data.ContainsKey(s.Interaction.User.Id))
-                        {
-                            s.Values.TryGetValue("Alrealage", out string realage);
-                            s.Values.TryGetValue("Alrpexp", out string rpexp);
-                            s.Values.TryGetValue("Alcharname", out string charname);
-                            s.Values.TryGetValue("Alcharagee", out string charage);
-                            s.Values.TryGetValue("Alcharlore", out string charlore);
-                            await Data[s.Interaction.User.Id].SubmitUserInfo(realage, rpexp, charage, charname, charlore);
-                            await Data[s.Interaction.User.Id].Allowlist.FinalizeAllowlistAsync(true);
-                        }
-                        break;
+                try
+                {
+                    switch (s.Interaction.Data.CustomId)
+                    {
+                        case "modal_RealInfoModal":
+                            if (Data.ContainsKey(s.Interaction.User.Id))
+                            {
+                                s.Values.TryGetValue("AlRealName", out string realname);
+                                s.Values.TryGetValue("AlRealAge", out string realage);
+                                s.Values.TryGetValue("AlExp", out string rpexp);
+                                await Data[s.Interaction.User.Id].Allowlist.ChangeForm();
+                                await Data[s.Interaction.User.Id].Allowlist.UpdateInteraction(s.Interaction);
+                                await Data[s.Interaction.User.Id].SubmitRealInfo(realname, realage, rpexp);
+                                await Data[s.Interaction.User.Id].Allowlist.SendFormToUser();
+                            }
+                            break;
+                        case "modal_CharInfoModal":
+                            if (Data.ContainsKey(s.Interaction.User.Id))
+                            {
+                                s.Values.TryGetValue("AlCharName", out string charname);
+                                s.Values.TryGetValue("AlCharAge", out string charage);
+                                s.Values.TryGetValue("AlCharLore", out string charlore);
+                                await Data[s.Interaction.User.Id].Allowlist.UpdateInteraction(s.Interaction);
+                                await Data[s.Interaction.User.Id].SubmitCharInfo(charage, charname, charlore);
+                                await Data[s.Interaction.User.Id].Allowlist.FinalizeAllowlistAsync(true);
+                            }
+                            break;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
                 }
             });
             return Task.CompletedTask;

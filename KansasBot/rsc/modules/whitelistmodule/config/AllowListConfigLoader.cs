@@ -45,19 +45,19 @@ namespace KansasBot.rsc.modules.whitelistmodule.config
                 return Task.FromResult(false);
             }
 
-            if (config.ChannelConfig == null || config.RolesConfig == null)
+            if (config.Channels == null || config.Roles == null)
             {
                 Client.Logger.LogWarning(new EventId(703, "AllowlistConfig"), $"ChannelConfig ou RolesConfig é nulo, verifique os arquivos de configuração em:\n {ConfigPath}");
                 return Task.FromResult(false);
             }
 
-            if (config.ChannelConfig.CategoryChannelId == null || config.ChannelConfig.MainChannelId == null || config.ChannelConfig.AprovedChannelId == null || config.ChannelConfig.ReprovedChannelId == null)
+            if (config.Channels.CategoryChannelId == null || config.Channels.MainChannelId == null || config.Channels.ApprovedChannelId == null || config.Channels.ReprovedChannelId == null)
             {
                 Client.Logger.LogWarning(new EventId(704, "AllowlistConfig"), $"Algum argumento em ChannelConfig é nulo, verifique os arquivos de configuração em:\n {ConfigPath}");
                 return Task.FromResult(false);
             }
 
-            if (config.RolesConfig.ReaderRoleId == null || config.RolesConfig.AprovedRoleId == null || config.RolesConfig.ReprovedRoleId == null)
+            if (config.Roles.ReaderRoleId == null || config.Roles.ApprovedRoleId == null || config.Roles.ReprovedRoleId == null)
             {
                 Client.Logger.LogWarning(new EventId(705, "AllowlistConfig"), $"Algum argumento em RolesConfig é nulo, verifique os arquivos de configuração em:\n {ConfigPath}");
                 return Task.FromResult(false);

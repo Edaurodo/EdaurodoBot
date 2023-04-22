@@ -5,14 +5,14 @@ using KansasBot.rsc.modules.genericmodule.commands.create.embed;
 using KansasBot.rsc.modules.whitelistmodule.services;
 using Newtonsoft.Json;
 
-namespace KansasBot.rsc.modules.whitelistmodule.commands.commandclass
+namespace KansasBot.rsc.modules.whitelistmodule.commands.update
 {
-    public sealed class UpdateWlMessage
+    public sealed class UpdateMainMessage
     {
         private InteractionContext Context;
         private AllowlistService Module;
         private Embed _embed;
-        public UpdateWlMessage(InteractionContext context, AllowlistService service)
+        public UpdateMainMessage(InteractionContext context, AllowlistService service)
         {
             Context = context;
             Module = service;
@@ -32,7 +32,7 @@ namespace KansasBot.rsc.modules.whitelistmodule.commands.commandclass
         }
         private async Task UpdateMessage()
         {
-            var channel = Context.Guild.GetChannel((ulong)Module.Config.ChannelConfig.MainChannelId);
+            var channel = Context.Guild.GetChannel((ulong)Module.Config.Channels.MainChannelId);
             if (channel != null)
             {
                 string json = JsonConvert.SerializeObject(Module.Config.Messages.MainMessage.EmbedJson);
@@ -77,8 +77,8 @@ namespace KansasBot.rsc.modules.whitelistmodule.commands.commandclass
         private IEnumerable<DiscordActionRowComponent> GetButtons()
         {
             List<DiscordComponent> button_line = new List<DiscordComponent>() {
-            new DiscordLinkButtonComponent(Module.Config.Messages.MainMessage.RuleButtonLink, "REGRAS", false, null),
-            new DiscordButtonComponent(ButtonStyle.Success, "btn_alstartal", "INICIAR", false, null)
+            new DiscordLinkButtonComponent(Module.Config.Messages.MainMessage.RuleButtonLink, "Leias as Regras", false, null),
+            new DiscordButtonComponent(ButtonStyle.Success, "btn_AlStart", "Iniciar Allowlist", false, null)
             };
 
             List<DiscordActionRowComponent> components_lines = new List<DiscordActionRowComponent>() {

@@ -12,20 +12,26 @@ namespace KansasBot.rsc.modules.whitelistmodule.data
         public int? CurrentQuestion { get; private set; }
         public uint[]? Response { get; private set; }
 
+        public string? UserName { get; private set; }
         public string? UserAge { get; private set; }
-        public string? UserRpExp { get; private set; }
+        public string? UserExp { get; private set; }
         public string? CharAge { get; private set; }
         public string? CharName { get; private set; }
         public string? CharLore { get; private set; }
-        public AllowlistData (Allowlist allowlist) => this.Allowlist = allowlist;
+        public AllowlistData(Allowlist allowlist) => this.Allowlist = allowlist;
 
 
-        public Task SubmitUserInfo(string? userage, string? userrpexp, string? charage, string? charname, string? charlore)
+        public Task SubmitRealInfo(string? username, string? userage, string? userexp)
         {
+            this.UserName = username;
             this.UserAge = userage;
-            this.UserRpExp = userrpexp;
-            this.CharAge = charage;
+            this.UserExp = userexp;
+            return Task.CompletedTask;
+        }
+        public Task SubmitCharInfo(string? charage, string? charname, string? charlore)
+        {
             this.CharName = charname;
+            this.CharAge = charage;
             this.CharLore = charlore;
             return Task.CompletedTask;
         }
@@ -44,7 +50,7 @@ namespace KansasBot.rsc.modules.whitelistmodule.data
         }
         public Task IncrementAtempt()
         {
-            this.Atempt ??= 1; 
+            this.Atempt ??= 1;
             this.Atempt++;
             return Task.CompletedTask;
         }

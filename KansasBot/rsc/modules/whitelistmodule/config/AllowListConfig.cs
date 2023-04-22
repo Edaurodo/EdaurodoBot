@@ -8,17 +8,17 @@ namespace KansasBot.rsc.modules.whitelistmodule.config
         [JsonProperty("use_allowlist_module")]
         public bool Use { get; private set; } = true;
 
-        [JsonProperty("channels_config", NullValueHandling = NullValueHandling.Include)]
-        public AllowListChannel? ChannelConfig { get; private set; } = new AllowListChannel();
+        [JsonProperty("channels", NullValueHandling = NullValueHandling.Include)]
+        public AllowListChannel? Channels { get; private set; } = new AllowListChannel();
 
-        [JsonProperty("roles_config", NullValueHandling = NullValueHandling.Include)]
-        public AllowListRoles? RolesConfig { get; private set; } = new AllowListRoles();
+        [JsonProperty("roles", NullValueHandling = NullValueHandling.Include)]
+        public AllowListRoles? Roles{ get; private set; } = new AllowListRoles();
 
         [JsonProperty("messages", NullValueHandling = NullValueHandling.Include)]
         public AllowlistMessages? Messages { get; private set; } = new AllowlistMessages();
 
         [JsonProperty("quests", NullValueHandling = NullValueHandling.Include)]
-        public AllowListQuest[]? QuestConfig { get; private set; } = new[] {
+        public AllowListQuest[]? Quests{ get; private set; } = new[] {
             new AllowListQuest("Questão 1", new[] { "Alternativa 1", "Alternativa 2", "Quantas voce quiser desde que não ultrapasse 25" }, 2),
             new AllowListQuest("Questão 2", new[] { "Alternativa 1", "Alternativa 2", "Quantas voce quiser desde que não ultrapasse 25" }, 3)
         };
@@ -33,7 +33,7 @@ namespace KansasBot.rsc.modules.whitelistmodule.config
         [JsonProperty("rule_button_link", NullValueHandling = NullValueHandling.Include)]
         public string? RuleButtonLink { get; private set; } = "https://youtu.be/Sagg08DrO5U?t=0";
 
-        [JsonProperty("embed_json", NullValueHandling = NullValueHandling.Include)]
+        [JsonProperty("embed", NullValueHandling = NullValueHandling.Include)]
         public Embed EmbedJson { get; private set; } = new Embed()
         {
             Color = "#2B2D31",
@@ -60,27 +60,27 @@ namespace KansasBot.rsc.modules.whitelistmodule.config
     }
     public sealed class AllowListRoles
     {
-        [JsonProperty("reader_role_id", NullValueHandling = NullValueHandling.Include)]
+        [JsonProperty("reader_id", NullValueHandling = NullValueHandling.Include)]
         public ulong? ReaderRoleId { get; private set; } = null;
 
-        [JsonProperty("aproved_role_id", NullValueHandling = NullValueHandling.Include)]
-        public ulong? AprovedRoleId { get; private set; } = null;
+        [JsonProperty("approved_id", NullValueHandling = NullValueHandling.Include)]
+        public ulong? ApprovedRoleId { get; private set; } = null;
 
-        [JsonProperty("reproved_role_id", NullValueHandling = NullValueHandling.Include)]
+        [JsonProperty("reproved_id", NullValueHandling = NullValueHandling.Include)]
         public ulong? ReprovedRoleId { get; private set; } = null;
     }
     public sealed class AllowListChannel
     {
-        [JsonProperty("allowlist_category_channel_id", NullValueHandling = NullValueHandling.Include)]
+        [JsonProperty("allowlist_category_id", NullValueHandling = NullValueHandling.Include)]
         public ulong? CategoryChannelId { get; private set; } = null;
 
-        [JsonProperty("main_channel_id", NullValueHandling = NullValueHandling.Include)]
+        [JsonProperty("main_id", NullValueHandling = NullValueHandling.Include)]
         public ulong? MainChannelId { get; private set; } = null;
 
-        [JsonProperty("aproved_channel_id", NullValueHandling = NullValueHandling.Include)]
-        public ulong? AprovedChannelId { get; private set; } = null;
+        [JsonProperty("approved_id", NullValueHandling = NullValueHandling.Include)]
+        public ulong? ApprovedChannelId { get; private set; } = null;
 
-        [JsonProperty("reproved_channel_id", NullValueHandling = NullValueHandling.Include)]
+        [JsonProperty("reproved_id", NullValueHandling = NullValueHandling.Include)]
         public ulong? ReprovedChannelId { get; private set; } = null;
     }
     public struct AllowListQuest
@@ -88,16 +88,16 @@ namespace KansasBot.rsc.modules.whitelistmodule.config
         [JsonProperty("question", NullValueHandling = NullValueHandling.Include)]
         public string? QuestName { get; private set; }
 
-        [JsonProperty("quest_alternatives", NullValueHandling = NullValueHandling.Include)]
-        public string[]? QuestAlternative { get; private set; }
+        [JsonProperty("alternatives", NullValueHandling = NullValueHandling.Include)]
+        public string[]? Alternatives { get; private set; }
 
-        [JsonProperty("correct_alternative", NullValueHandling = NullValueHandling.Include)]
-        public uint? QuestCorrectResponse { get; private set; }
+        [JsonProperty("correct_response", NullValueHandling = NullValueHandling.Include)]
+        public int? QuestCorrectResponse { get; private set; }
 
-        public AllowListQuest(string? questName, string[]? questAlternative, uint? questCorrectResponse)
+        public AllowListQuest(string? questName, string[]? questAlternative, int? questCorrectResponse)
         {
             QuestName = questName;
-            QuestAlternative = questAlternative;
+            Alternatives = questAlternative;
             QuestCorrectResponse = questCorrectResponse;
         }
     }
