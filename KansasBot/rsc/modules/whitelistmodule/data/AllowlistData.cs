@@ -22,17 +22,17 @@ namespace KansasBot.rsc.modules.whitelistmodule.data
 
         public AllowlistData(Allowlist allowlist) => this.Allowlist = allowlist;
 
-        public Task SubmitStartAllowlist()
+        public Task SubmitStartAllowlistTime()
         {
             StartAllowlistTime = DateTime.Now.ToUniversalTime();
             return Task.CompletedTask;
         }
-        public Task SetFinishAllowlistNull()
+        public Task SetFinishAllowlistTimeNull()
         {
             FinishAllowlistTime = null;
             return Task.CompletedTask;
         }
-        public Task SubmitFinishAllowlist()
+        public Task SubmitFinishAllowlistTime()
         {
             FinishAllowlistTime = DateTime.Now.ToUniversalTime();
             return Task.CompletedTask;

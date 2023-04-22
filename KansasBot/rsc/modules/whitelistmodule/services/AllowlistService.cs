@@ -34,10 +34,7 @@ namespace KansasBot.rsc.modules.whitelistmodule.services
                         case "btn_AlStart":
                             if (!Data.ContainsKey(s.Interaction.User.Id))
                             {
-                                if (Data.TryAdd(s.Interaction.User.Id, new AllowlistData(new Allowlist(this, s))))
-                                {
-                                    await Data[s.Interaction.User.Id].Allowlist.ExecuteAsync();
-                                }
+                                if (Data.TryAdd(s.Interaction.User.Id, new AllowlistData(new Allowlist(this, s)))) { await Data[s.Interaction.User.Id].Allowlist.ExecuteAsync(); }
                             }
                             else
                             {

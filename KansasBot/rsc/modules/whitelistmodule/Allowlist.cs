@@ -32,15 +32,15 @@ namespace KansasBot.rsc.modules.whitelistmodule
                 {
                     Member = await Guild.GetMemberAsync(User.Id);
                     await CreateChannelAndSendWarnMessage();
-                    await Service.Data[User.Id].SubmitStartAllowlist();
+                    await Service.Data[User.Id].SubmitStartAllowlistTime();
                     return;
                 }
                 if (Service.Data[User.Id].FinishAllowlistTime != null)
                 {
                     Member = await Guild.GetMemberAsync(User.Id);
                     await CreateChannelAndSendWarnMessage();
-                    await Service.Data[User.Id].SubmitStartAllowlist();
-                    await Service.Data[User.Id].SetFinishAllowlistNull();
+                    await Service.Data[User.Id].SubmitStartAllowlistTime();
+                    await Service.Data[User.Id].SetFinishAllowlistTimeNull();
                     return;
                 }
 
@@ -52,8 +52,7 @@ namespace KansasBot.rsc.modules.whitelistmodule
                     if (await QuizApproved()) { await SendFormToUser(); }
                     else
                     {
-                        await ShowAllowlistChannel();
-                        await Service.Data[User.Id].SubmitFinishAllowlist();
+                        await FinalizeAllowlistAsync(false);
                     }
                 }
             } 
@@ -122,7 +121,7 @@ namespace KansasBot.rsc.modules.whitelistmodule
             if (approved)
             {
                 await SendFormToReader();
-                await Service.Data[User.Id].SubmitFinishAllowlist();
+                await Service.Data[User.Id].SubmitFinishAllowlistTime();
                 await Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder()
                     .AddEmbed(new DiscordEmbedBuilder()
                     .WithColor(new DiscordColor("#2B2D31"))
@@ -131,13 +130,35 @@ namespace KansasBot.rsc.modules.whitelistmodule
                         $"Seu formulário foi enviado para os nossos <@&{Service.Config.Roles.ReaderRoleId}>,\n" +
                         "agora basta esperar eles ler sua lore, e em breve você ira\n" +
                         $"receber uma notificação em <#{Service.Config.Channels.ApprovedChannelId}> se aprovado.\n\n" +
-                        "> * **Seu canal será **deletado** em 1 minuto.**")
+                        "> * **Seu canal será **deletado** em 45 segundos.**")
                     .WithFooter("📄 Sistema de Allowlist - Kansas Roleplay")
                     .Build()));
-                await Task.Delay(60000);
+                await Task.Delay(45000);
                 await Service.Data[User.Id].AllowListChannel.DeleteAsync();
             }
-            else { }
+            else {
+                await Service.Data[User.Id].SubmitFinishAllowlistTime();
+                await Guild.GetChannel((ulong)Service.Config.Channels.ReprovedChannelId).SendMessageAsync($"> * <@{User.Id}> Sua Allowlist foi reprovada... Releia as regras do servidor [clicando aqui]({Service.Config.Messages.MainMessage.ButtonLink}), e tente novamente assim que se sentir confiante.");
+
+                await Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder()
+                    .AddEmbed(new DiscordEmbedBuilder()
+                    .WithColor(new DiscordColor("#2B2D31"))
+                    .WithTitle("> Infelizmente você não passou em nosso questionário")
+                    .WithDescription(
+                        $"Infelizmente você não conseguiu passar na **Allowlist.**,\n" +
+                        "más não tem problema você pode tentar fazer novamente em\n" +
+                        $"{Service.Config.ReprovedWaitTime} minutos, enquanto isto você pode reler nossas regras\n" +
+                        $"[clicando aqui]({Service.Config.Messages.MainMessage.ButtonLink}) ou no botão a baixo **\"Leia as regras\"**\n" +
+                        $"você pode verificar em <#{Service.Config.Channels.ReprovedChannelId}> o motivo.\n" +
+                        $"pelo qual reprovou na **Allowlist**!\n" +
+                        "> * **Seu canal será **deletado** em 45 segundos.**")
+                    .WithFooter("📄 Sistema de Allowlist - Kansas Roleplay")
+                    .Build())
+                    .AddComponents(new DiscordLinkButtonComponent(Service.Config.Messages.MainMessage.ButtonLink, "Leia as Regras", false, null)));
+                await ShowAllowlistChannel();
+                await Task.Delay(45000);
+                await Service.Data[User.Id].AllowListChannel.DeleteAsync();
+            }
         }
         private async Task SendFormToReader()
         {
@@ -152,12 +173,18 @@ namespace KansasBot.rsc.modules.whitelistmodule
                 name: $"allowlist-{Member.DisplayName}",
                 type: ChannelType.Text,
                 parent: category).GetAwaiter().GetResult()
-                .SendMessageAsync(new DiscordMessageBuilder()
+                .SendMessageAsync(
+                new DiscordMessageBuilder()
                 .AddEmbeds(new List<DiscordEmbed>(){
                     new DiscordEmbedBuilder()
-                .WithColor(new DiscordColor("#2B2D31"))
-                .WithTitle($"Você esta lendo Allowlist de {Member.DisplayName}")
-                .WithDescription(
+                    .WithColor(new DiscordColor("#2B2D31"))
+                    .WithTitle("userinfo [ignore]")
+                    .WithDescription($"user_id: {User.Id}\n")
+                    .Build(),
+                    new DiscordEmbedBuilder()
+                    .WithColor(new DiscordColor("#2B2D31"))
+                    .WithTitle($"Você esta lendo Allowlist de {Member.DisplayName}")
+                    .WithDescription(
                         "ㅤ\n" +
                         "> **Leia com todo cuidado e seja detalhista**\n\n" +
                         "Você é o filtro para fazer o servidor um local imersivo e\n" +
@@ -165,30 +192,25 @@ namespace KansasBot.rsc.modules.whitelistmodule
                         "tome notas de dúvidas que você teve sobre a história do personagem,\n" +
                         "na hora da entrevista seja atencioso(a) e explique para os player sobre\n" +
                         "o servidor e sobre o roleplay, pois muitos será a primeira vez jogando.\n")
-                .Build(),
-                new DiscordEmbedBuilder()
-                .WithColor(new DiscordColor("#2B2D31"))
-                .WithDescription("**INFORMÇÕES PESSOAIS**")
-                .AddField("> NOME REAL", $"**Nome:**\n`{Service.Data[User.Id].UserName}`", true)
-                .AddField("> IDADE REAL", $"**Idade:**\n`{Service.Data[User.Id].UserAge}`", true)
-                .AddField("> EXPERIÊNCIA", $"**Experiência:**\n`{Service.Data[User.Id].UserExp}`", true)
-                .AddField( "ㅤ", "**INFORMAÇÕES SOBRE O PERSONAGEM**", false)
-                .AddField("> NOME DO PERSONAGEM", $"**Nome:**\n`{Service.Data[User.Id].CharName}`",true)
-                .AddField("> IDADE DO PERSONAGEM", $"**Idade:**\n`{Service.Data[User.Id].CharAge}`", true)
-                .Build(),
-                new DiscordEmbedBuilder()
-                .WithColor(new DiscordColor("#2B2D31"))
-                .WithTitle("LORE DO PERSONAGEM\nㅤ")
-                .WithDescription($"```{Service.Data[User.Id].CharLore}```")
-                .Build(),
-                new DiscordEmbedBuilder()
-                .WithColor(new DiscordColor("#2B2D31"))
-                .WithTitle("userinfo [ignore]")
-                .WithDescription($"user_id: {User.Id}\n")
-                .Build()})
+                    .Build(),
+                    new DiscordEmbedBuilder()
+                    .WithColor(new DiscordColor("#2B2D31"))
+                    .WithDescription("**INFORMÇÕES PESSOAIS**")
+                    .AddField("> NOME REAL", $"**Nome:**\n`{Service.Data[User.Id].UserName}`", true)
+                    .AddField("> IDADE REAL", $"**Idade:**\n`{Service.Data[User.Id].UserAge}`", true)
+                    .AddField("> EXPERIÊNCIA", $"**Experiência:**\n`{Service.Data[User.Id].UserExp}`", true)
+                    .AddField( "ㅤ", "**INFORMAÇÕES SOBRE O PERSONAGEM**", false)
+                    .AddField("> NOME DO PERSONAGEM", $"**Nome:**\n`{Service.Data[User.Id].CharName}`",true)
+                    .AddField("> IDADE DO PERSONAGEM", $"**Idade:**\n`{Service.Data[User.Id].CharAge}`", true)
+                    .Build(),
+                    new DiscordEmbedBuilder()
+                    .WithColor(new DiscordColor("#2B2D31"))
+                    .WithTitle("LORE DO PERSONAGEM\nㅤ")
+                    .WithDescription($"```{Service.Data[User.Id].CharLore}```")
+                    .Build()})
                 .AddComponents(new List<DiscordComponent>(){
-                new DiscordButtonComponent(ButtonStyle.Danger, "btn_AlReproved", "REPROVAR", false),
-                new DiscordButtonComponent(ButtonStyle.Success, "btn_AlApproved", "APROVAR", false)}));
+                    new DiscordButtonComponent(ButtonStyle.Danger, "btn_AlReproved", "REPROVAR", false),
+                    new DiscordButtonComponent(ButtonStyle.Success, "btn_AlApproved", "APROVAR", false)}));
         }
         private async Task QuizUpdateMessage()
         {
@@ -252,7 +274,7 @@ namespace KansasBot.rsc.modules.whitelistmodule
         }
         private async Task ShowAllowlistChannel()
         {
-            await Guild.GetChannel((ulong)Service.Config.Channels.MainChannelId).AddOverwriteAsync(Member, Permissions.AccessChannels, Permissions.None);
+            await Guild.GetChannel((ulong)Service.Config.Channels.MainChannelId).DeleteOverwriteAsync(Member);
         }
         private async Task CreateChannelAndSendWarnMessage()
         {

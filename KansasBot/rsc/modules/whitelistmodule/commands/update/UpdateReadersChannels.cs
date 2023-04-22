@@ -31,26 +31,11 @@ namespace KansasBot.rsc.modules.whitelistmodule.commands.update
 
         private async Task ExecuteUpdate()
         {
-            foreach(var category in ReadersCategoryes)
-            {
-                ulong id = ulong.Parse(category.Name.Substring(category.Name.IndexOf('-') + 1));
-                if (!Readers.Exists(_ => _.Id == id))
-                {
-                    if(category.Children.Count > 0)
-                    {
-                        ReadersCategoryes.Remove(category);
-                        await category.ModifyAsync(_ => _.Name = "rearranging-channels");
-                        await RearrangeChannels(category.Children.ToList());
-                    }
-                    await category.DeleteAsync();
-                }
-            }
-
             foreach (var reader in Readers)
             {
                 if (!ReadersCategoryes.Exists(_ => _.Name == $"reader-{reader.Id}"))
                 {
-                    await Guild.CreateChannelCategoryAsync(
+                    ReadersCategoryes.Add(Guild.CreateChannelCategoryAsync(
                         $"reader-{reader.Id}",
                         new List<DiscordOverwriteBuilder>() {
                         new DiscordOverwriteBuilder()
@@ -61,7 +46,22 @@ namespace KansasBot.rsc.modules.whitelistmodule.commands.update
                         .Allow(Permissions.AccessChannels)
                         .Allow(Permissions.ReadMessageHistory)
                         .Deny(Permissions.SendMessages)
-                        });
+                        }).GetAwaiter().GetResult());
+                }
+            }
+
+            foreach (var category in ReadersCategoryes)
+            {
+                ulong id = ulong.Parse(category.Name.Substring(category.Name.IndexOf('-') + 1));
+                if (!Readers.Exists(_ => _.Id == id))
+                {
+                    if (category.Children.Count > 0)
+                    {
+                        ReadersCategoryes.Remove(category);
+                        await category.ModifyAsync(_ => _.Name = "rearranging-channels");
+                        await RearrangeChannels(category.Children.ToList());
+                    }
+                    await category.DeleteAsync();
                 }
             }
         }
@@ -74,7 +74,16 @@ namespace KansasBot.rsc.modules.whitelistmodule.commands.update
                 {
                     if (category.Children.Count < tempReaderCategory.Children.Count) { tempReaderCategory = category; }
                 }
-                await channels.First().ModifyAsync(_ => _.Parent = tempReaderCategory);
+                await channels.First().ModifyAsync(_ => { 
+                    _.Parent = tempReaderCategory;
+                    _.PermissionOverwrites = new List<DiscordOverwriteBuilder>() {
+                    new DiscordOverwriteBuilder().For(Context.Guild.GetMemberAsync(ulong.Parse(tempReaderCategory.Name.Substring(tempReaderCategory.Name.IndexOf('-')+1))).GetAwaiter().GetResult())
+                    .Allow(Permissions.AccessChannels)
+                    .Allow(Permissions.ReadMessageHistory)
+                    .Deny(Permissions.SendMessages),
+                    new DiscordOverwriteBuilder().For(Context.Guild.EveryoneRole)
+                    .Deny(Permissions.AccessChannels)};
+                }) ;
                 channels.RemoveAt(0);
             }
         }
