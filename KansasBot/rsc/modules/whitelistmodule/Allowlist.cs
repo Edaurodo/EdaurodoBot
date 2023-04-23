@@ -24,38 +24,59 @@ namespace KansasBot.rsc.modules.whitelistmodule
             Member = null;
             Form = 1;
         }
+
         public async Task ExecuteAsync()
         {
-            if (Service.Data[User.Id].StartAllowlistTime == null || Service.Data[User.Id].FinishAllowlistTime == null || Service.Data[User.Id].FinishAllowlistTime.Value.Subtract(DateTime.Now.ToUniversalTime()).TotalMinutes < Service.Config.ReprovedWaitTime * (-1))
+            try
             {
-                if (Service.Data[User.Id].StartAllowlistTime == null)
+                if (Service.Data[User.Id].StartAllowlistTime == null || Service.Data[User.Id].FinishAllowlistTime == null || Service.Data[User.Id].FinishAllowlistTime.Value.Subtract(DateTime.Now.ToUniversalTime()).TotalMinutes < Service.Config.ReprovedWaitTime * (-1))
                 {
-                    Member = await Guild.GetMemberAsync(User.Id);
-                    await CreateChannelAndSendWarnMessage();
-                    await Service.Data[User.Id].SubmitStartAllowlistTime();
-                    return;
-                }
-                if (Service.Data[User.Id].FinishAllowlistTime != null)
-                {
-                    Member = await Guild.GetMemberAsync(User.Id);
-                    await CreateChannelAndSendWarnMessage();
-                    await Service.Data[User.Id].SubmitStartAllowlistTime();
-                    await Service.Data[User.Id].SetFinishAllowlistTimeNull();
-                    return;
-                }
+                    if (Service.Data[User.Id].StartAllowlistTime == null)
+                    {
+                        Member = await Guild.GetMemberAsync(User.Id);
+                        await CreateChannelAndSendWarnMessage();
+                        await Service.Data[User.Id].SubmitStartAllowlistTime();
+                        return;
+                    }
+                    if (Service.Data[User.Id].FinishAllowlistTime != null)
+                    {
+                        await Service.Data[User.Id].ClearDataBase();
+                        Member = await Guild.GetMemberAsync(User.Id);
+                        await CreateChannelAndSendWarnMessage();
+                        await Service.Data[User.Id].SubmitStartAllowlistTime();
+                        await Service.Data[User.Id].SetFinishAllowlistTimeNull();
+                        return;
+                    }
 
-                await Service.Data[User.Id].IncrementCurrentQuestion();
+                    await Service.Data[User.Id].IncrementCurrentQuestion();
 
-                if (Service.Data[User.Id].CurrentQuestion < Service.Config.Questions.Length) { await QuizUpdateMessage(); }
-                else
-                {
-                    if (await QuizApproved()) { await SendFormToUser(); }
+                    if (Service.Data[User.Id].CurrentQuestion < Service.Config.Questions.Length) { await QuizUpdateMessage(); }
                     else
                     {
-                        await FinalizeAllowlistAsync(false);
+                        if (await QuizApproved()) { await SendFormToUser(); }
+                        else
+                        {
+                            await FinalizeAllowlistAsync(false);
+                        }
                     }
                 }
-            } 
+                else
+                {
+                    Console.WriteLine(Service.Data[User.Id].FinishAllowlistTime.Value.Date.Subtract(DateTime.Now.ToUniversalTime()));
+                    await Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
+                    .AddEmbed(new DiscordEmbedBuilder()
+                    .WithColor(new DiscordColor("#2B2D31"))
+                    .WithTitle("Você ainda não pode fazer a Allowlist!")
+                    .WithDescription(
+                        $"> Você tentou fazer a Allowlist recentemente e não passou\n" +
+                        $"> você pode tentar novamente em **{Service.Data[User.Id].FinishAllowlistTime.Value.AddMinutes((double)Service.Config.ReprovedWaitTime).Subtract(DateTime.Now.ToUniversalTime()).ToString("hh\\:mm\\:ss")}**, enquanto isso\n" +
+                        $"> use este tempo para ler nossas regras [clicando aqui]({Service.Config.Messages.MainMessage.ButtonLink})!"))
+                    .AsEphemeral(true));
+                }
+            }catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString()); 
+            }
         }
 
         public async Task SendFormToUser()

@@ -10,7 +10,6 @@ namespace KansasBot.rsc.modules.whitelistmodule.data
         public DiscordMessage? AllowListMessage { get; private set; }
         public DateTime? StartAllowlistTime { get; private set; }
         public DateTime? FinishAllowlistTime { get; private set; }
-        public byte? Atempt { get; private set; }
         public int? CurrentQuestion { get; private set; }
         public uint[]? Response { get; private set; }
         public string? UserName { get; private set; }
@@ -22,6 +21,23 @@ namespace KansasBot.rsc.modules.whitelistmodule.data
 
         public AllowlistData(Allowlist allowlist) => this.Allowlist = allowlist;
 
+        public Task ClearDataBase()
+        {
+            ResponseList = null;
+            AllowListChannel = null;
+            AllowListMessage = null;
+            StartAllowlistTime = null;
+            FinishAllowlistTime = null;
+            CurrentQuestion = null;
+            Response = null;
+            UserName = null;
+            UserAge = null;
+            UserExp = null;
+            CharAge = null;
+            CharName = null;
+            CharLore = null;
+            return Task.CompletedTask;
+        }
         public Task SubmitStartAllowlistTime()
         {
             StartAllowlistTime = DateTime.Now.ToUniversalTime();
@@ -62,12 +78,6 @@ namespace KansasBot.rsc.modules.whitelistmodule.data
         {
             this.CurrentQuestion ??= -1;
             this.CurrentQuestion++;
-            return Task.CompletedTask;
-        }
-        public Task IncrementAtempt()
-        {
-            this.Atempt ??= 1;
-            this.Atempt++;
             return Task.CompletedTask;
         }
         public Task SetChannel(DiscordChannel channel)
