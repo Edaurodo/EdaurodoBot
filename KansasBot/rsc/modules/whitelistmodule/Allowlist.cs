@@ -14,6 +14,7 @@ namespace KansasBot.rsc.modules.whitelistmodule
         private DiscordUser User;
         private DiscordMember? Member;
         private int Form;
+
         public Allowlist(AllowlistService service, InteractionCreateEventArgs sender)
         {
             Service = service;
@@ -27,8 +28,6 @@ namespace KansasBot.rsc.modules.whitelistmodule
 
         public async Task ExecuteAsync()
         {
-            try
-            {
                 if (Service.Data[User.Id].StartAllowlistTime == null || Service.Data[User.Id].FinishAllowlistTime == null || Service.Data[User.Id].FinishAllowlistTime.Value.Subtract(DateTime.Now.ToUniversalTime()).TotalMinutes < Service.Config.ReprovedWaitTime * (-1))
                 {
                     if (Service.Data[User.Id].StartAllowlistTime == null)
@@ -73,12 +72,7 @@ namespace KansasBot.rsc.modules.whitelistmodule
                         $"> use este tempo para ler nossas regras [clicando aqui]({Service.Config.Messages.MainMessage.ButtonLink})!"))
                     .AsEphemeral(true));
                 }
-            }catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString()); 
-            }
         }
-
         public async Task SendFormToUser()
         {
             await Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder().AddEmbed(GetEmbedModal()).AddComponents(GetComponentEmbedModal()));
