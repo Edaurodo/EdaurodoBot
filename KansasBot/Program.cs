@@ -1,13 +1,6 @@
 ﻿using KansasBot.rsc.core;
 using KansasBot.rsc.core.data;
 
-var x = DateTime.Now.ToUniversalTime().Subtract(DateTime.Now.ToUniversalTime().AddMinutes(2));
-
-Console.WriteLine(x.ToString("hh\\:mm\\:ss"));
-
-//Console.WriteLine(0 * (-1));
-
-
 try
 {
     var configLoader = new KansasConfigLoader();

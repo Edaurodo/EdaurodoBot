@@ -92,9 +92,9 @@ namespace KansasBot.rsc.modules.whitelistmodule.config
             {
                 if (config.Use)
                 {
-                    if (config.Roles != null && config.Roles.ReaderRoleId != null && config.Roles.ApprovedRoleId != null && config.Roles.ReprovedRoleId != null)
+                    if (config.Roles != null && config.Roles.ReaderId != null && config.Roles.ApprovedId != null && config.Roles.ReprovedId != null && config.Roles.AllowlistSentId != null && config.Roles.WaitingInterviewId != null)
                     {
-                        if (config.Channels != null && config.Channels.CategoryChannelId != null && config.Channels.MainChannelId != null && config.Channels.ApprovedChannelId != null && config.Channels.ReprovedChannelId != null)
+                        if (config.Channels != null && config.Channels.CategoryId != null && config.Channels.MainId != null && config.Channels.ApprovedId != null && config.Channels.ReprovedId != null && config.Channels.InterviewId != null)
                         {
                             if (config.Questions != null && config.Questions.Length > 0)
                             {

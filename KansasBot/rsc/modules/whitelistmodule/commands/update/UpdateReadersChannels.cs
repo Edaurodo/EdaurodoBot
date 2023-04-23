@@ -18,7 +18,7 @@ namespace KansasBot.rsc.modules.whitelistmodule.commands.update
             Context = context;
             Service = service;
             Guild = Context.Guild;
-            Role = Guild.GetRole((ulong)Service.Config.Roles.ReaderRoleId);
+            Role = Guild.GetRole((ulong)Service.Config.Roles.ReaderId);
             Readers = Guild.GetAllMembersAsync().GetAwaiter().GetResult().ToList().FindAll(_ => _.Roles.Contains(Role));
             ReadersCategoryes = Guild.GetChannelsAsync().GetAwaiter().GetResult().ToList().FindAll(_ => _.IsCategory == true && _.Name.StartsWith("reader-"));
         }

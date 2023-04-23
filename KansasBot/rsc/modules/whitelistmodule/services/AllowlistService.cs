@@ -32,13 +32,25 @@ namespace KansasBot.rsc.modules.whitelistmodule.services
                     case "btn_AlStart":
                         if (!Data.ContainsKey(s.Interaction.User.Id))
                         {
+                            Console.WriteLine("ADICIONOU UMA NOVA INSTANCIA DE ALLOWLISTDATA");
                             if (Data.TryAdd(s.Interaction.User.Id, new AllowlistData(new Allowlist(this, s)))) { await Data[s.Interaction.User.Id].Allowlist.ExecuteAsync(); }
                         }
                         else
                         {
+                            Console.WriteLine("NÃO ADICIONOU UMA NOVA INSTANCIA DE ALLOWLISTDATA");
                             await Data[s.Interaction.User.Id].Allowlist.UpdateInteraction(s.Interaction);
                             await Data[s.Interaction.User.Id].Allowlist.ExecuteAsync();
                         }
+                        break;
+                    case "btn_AlApproved":
+                        if (ulong.TryParse(s.Channel.Name.Substring(s.Channel.Name.IndexOf('-') + 1), out var id))
+                        {
+                            await Data[id].Allowlist.UpdateInteraction(s.Interaction);
+                            await Data[id].Allowlist.AllowlistApproved();
+                        }
+                        break;
+                    case "btn_AlReproved":
+                        await Data[s.Interaction.User.Id].Allowlist.UpdateInteraction(s.Interaction);
                         break;
                     case "btn_openRealInfoModal":
                         await Data[s.Interaction.User.Id].Allowlist.UpdateInteraction(s.Interaction);
@@ -86,7 +98,7 @@ namespace KansasBot.rsc.modules.whitelistmodule.services
                             s.Values.TryGetValue("AlCharLore", out string charlore);
                             await Data[s.Interaction.User.Id].Allowlist.UpdateInteraction(s.Interaction);
                             await Data[s.Interaction.User.Id].SubmitCharInfo(charage, charname, charlore);
-                            await Data[s.Interaction.User.Id].Allowlist.FinalizeAllowlistAsync(true);
+                            await Data[s.Interaction.User.Id].Allowlist.FinalizeAllowlistQuizAsync(true);
                         }
                         break;
                 }

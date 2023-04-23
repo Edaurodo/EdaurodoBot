@@ -39,31 +39,40 @@ namespace KansasBot.rsc.modules.whitelistmodule.config
     public sealed class AllowlistRoles
     {
         [JsonProperty("reader_id")]
-        public ulong? ReaderRoleId { get; private set; } = null;
+        public ulong? ReaderId { get; private set; }
 
         [JsonProperty("approved_id")]
-        public ulong? ApprovedRoleId { get; private set; } = null;
+        public ulong? ApprovedId { get; private set; }
 
         [JsonProperty("reproved_id")]
-        public ulong? ReprovedRoleId { get; private set; } = null;
+        public ulong? ReprovedId { get; private set; }
 
-        public AllowlistRoles() { ReaderRoleId = null; ApprovedRoleId = null; ReprovedRoleId = null; }
+        [JsonProperty("allowlist_sent_id")]
+        public ulong? AllowlistSentId { get; private set; }
+
+        [JsonProperty("waiting_interview_id")]
+        public ulong? WaitingInterviewId { get; private set; }
+
+        public AllowlistRoles() { ReaderId = null; ApprovedId = null; ReprovedId = null; AllowlistSentId = null; WaitingInterviewId = null; }
     }
     public sealed class AllowlistChannels
     {
         [JsonProperty("allowlist_category_id")]
-        public ulong? CategoryChannelId { get; private set; }
+        public ulong? CategoryId { get; private set; }
 
         [JsonProperty("main_id")]
-        public ulong? MainChannelId { get; private set; }
+        public ulong? MainId { get; private set; }
 
         [JsonProperty("approved_id")]
-        public ulong? ApprovedChannelId { get; private set; }
+        public ulong? ApprovedId { get; private set; }
 
         [JsonProperty("reproved_id")]
-        public ulong? ReprovedChannelId { get; private set; }
+        public ulong? ReprovedId { get; private set; }
 
-        public AllowlistChannels() { CategoryChannelId = null; MainChannelId = null; ApprovedChannelId = null; ReprovedChannelId = null; }
+        [JsonProperty("interview_notice_id")]
+        public ulong? InterviewId { get; private set; }
+
+        public AllowlistChannels() { CategoryId = null; MainId = null; ApprovedId = null; ReprovedId = null; InterviewId = null; }
     }
     public struct AllowlistQuestion
     {

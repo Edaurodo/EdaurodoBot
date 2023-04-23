@@ -27,7 +27,7 @@ namespace KansasBot.rsc.modules.whitelistmodule.commands.update
         }
         private async Task UpdateMessage()
         {
-            var channel = Context.Guild.GetChannel((ulong)Module.Config.Channels.MainChannelId);
+            var channel = Context.Guild.GetChannel((ulong)Module.Config.Channels.MainId);
             if (channel != null)
             {
                 await channel.SendMessageAsync(new DiscordMessageBuilder().AddEmbed(KansasUtilities.GetEmbedFromJson(_embed, Module.Bot)).AddComponents(GetButtons()));
