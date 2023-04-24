@@ -2,11 +2,11 @@
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using KansasBot.rsc.modules.genericmodule.commands.create.embed;
-using KansasBot.rsc.modules.whitelistmodule.services;
+using KansasBot.rsc.modules.allowlistmodule.services;
 using KansasBot.rsc.utils;
 using Newtonsoft.Json;
 
-namespace KansasBot.rsc.modules.whitelistmodule.commands.update
+namespace KansasBot.rsc.modules.allowlistmodule.commands.update
 {
     public sealed class UpdateMainMessage
     {

@@ -1,22 +1,26 @@
 ﻿using DSharpPlus;
 using DSharpPlus.EventArgs;
 using KansasBot.rsc.core;
-using KansasBot.rsc.core.data;
-using KansasBot.rsc.modules.whitelistmodule.commands;
-using KansasBot.rsc.modules.whitelistmodule.config;
-using KansasBot.rsc.modules.whitelistmodule.data;
+using KansasBot.rsc.modules.allowlistmodule.commands;
+using KansasBot.rsc.modules.allowlistmodule.config;
+using KansasBot.rsc.modules.allowlistmodule.data;
 using KansasBot.rsc.utils;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using System.Collections.Concurrent;
 
-namespace KansasBot.rsc.modules.whitelistmodule.services
+namespace KansasBot.rsc.modules.allowlistmodule.services
 {
     public sealed class AllowlistService
     {
-        public KansasMain Bot { get; }
-        public AllowlistConfig? Config { get; private set; }
-        public AllowListConfigLoader? ConfigLoader { get; private set; }
         public ConcurrentDictionary<ulong, AllowlistData> Data { get; private set; }
+
+        [JsonIgnore]
+        public KansasMain Bot { get; }
+        [JsonIgnore]
+        public AllowlistConfig? Config { get; private set; }
+        [JsonIgnore]
+        public AllowListConfigLoader? ConfigLoader { get; private set; }
         public AllowlistService(KansasMain bot)
         {
             Bot = bot;

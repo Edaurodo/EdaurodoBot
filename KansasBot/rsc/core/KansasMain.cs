@@ -6,8 +6,8 @@ using KansasBot.rsc.core.data;
 using KansasBot.rsc.modules.genericmodule.commands.info;
 using KansasBot.rsc.modules.genericmodule.commands.create;
 using Microsoft.Extensions.DependencyInjection;
-using KansasBot.rsc.modules.whitelistmodule.commands;
-using KansasBot.rsc.modules.whitelistmodule.services;
+using KansasBot.rsc.modules.allowlistmodule.commands;
+using KansasBot.rsc.modules.allowlistmodule.services;
 
 namespace KansasBot.rsc.core
 {

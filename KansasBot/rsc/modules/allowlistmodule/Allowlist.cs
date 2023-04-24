@@ -1,9 +1,9 @@
 ﻿using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
-using KansasBot.rsc.modules.whitelistmodule.services;
+using KansasBot.rsc.modules.allowlistmodule.services;
 
-namespace KansasBot.rsc.modules.whitelistmodule
+namespace KansasBot.rsc.modules.allowlistmodule
 {
     public sealed class Allowlist
     {
@@ -92,10 +92,11 @@ namespace KansasBot.rsc.modules.whitelistmodule
         }
         public async Task AllowlistApproved()
         {
+            DiscordChannel channel = Interaction.Channel;
             if (await TryModifyApprovedAllowlistUserAsync())
             {
                 await Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder().AddEmbeds(await GetEmbedsWithUserInformations()));
-
+                
                 await Guild.GetChannel((ulong)Service.Config.Channels.ApprovedId)
                     .SendMessageAsync($"> * <@{User.Id}> Sua Allowlist foi aprovada: Fique atento ao canal <#{Service.Config.Channels.InterviewId}> para participar no melhor horário para você!");
 
@@ -109,10 +110,11 @@ namespace KansasBot.rsc.modules.whitelistmodule
                         $"atualizando o horário de entrevista.\n\n" +
                         $"**Este canal será excluido em 30 segundos**")
                     .Build());
+                await ResetSensitiveData();
                 _ = Task.Run(async () =>
                 {
                     await Task.Delay(30000);
-                    await Interaction.Channel.DeleteAsync();
+                    await channel.DeleteAsync();
                 });
             }
             else
@@ -130,12 +132,13 @@ namespace KansasBot.rsc.modules.whitelistmodule
                 _ = Task.Run(async () =>
                 {
                     await Task.Delay(30000);
-                    await Interaction.Channel.DeleteAsync();
+                    await channel.DeleteAsync();
                 });
             }
         }
         public async Task AllowlistReproved(string reason)
         {
+            DiscordChannel channel = Interaction.Channel;
             if (await TryModifyReprovedAllowlistUserAsync())
             {
                 await Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder().AddEmbeds(await GetEmbedsWithUserInformations()));
@@ -158,11 +161,11 @@ namespace KansasBot.rsc.modules.whitelistmodule
                     .WithColor(new DiscordColor("#2B2D31"))
                     .WithDescription($"```\n{reason}\n```\n**Releia as regras** [clicando aqui]({Service.Config.Messages.MainMessage.ButtonLink})!")
                     .Build()));
-
+                await ResetSensitiveData();
                 _ = Task.Run(async () =>
                 {
                     await Task.Delay(30000);
-                    await Interaction.Channel.DeleteAsync();
+                    await channel.DeleteAsync();
                 });
             }
             else
@@ -180,7 +183,7 @@ namespace KansasBot.rsc.modules.whitelistmodule
                 _ = Task.Run(async () =>
                 {
                     await Task.Delay(30000);
-                    await Interaction.Channel.DeleteAsync();
+                    await channel.DeleteAsync();
                 });
             }
         }
@@ -312,7 +315,7 @@ namespace KansasBot.rsc.modules.whitelistmodule
         {
             for (int i = 0; i < Service.Config.Questions.Length; i++)
             {
-                if (Service.Data[User.Id].Response[i] != Service.Config.Questions[i].CorrectAnswer) { return false; }
+                if (Service.Data[User.Id].Responses[i] != Service.Config.Questions[i].CorrectAnswer) { return false; }
             }
             return true;
         }
@@ -359,6 +362,11 @@ namespace KansasBot.rsc.modules.whitelistmodule
         private async Task ShowAllowlistChannel()
         {
             await Guild.GetChannel((ulong)Service.Config.Channels.MainId).DeleteOverwriteAsync(Member);
+        }
+        private async Task ResetSensitiveData()
+        {
+            Form = 0;
+            await Service.Data[User.Id].ReprovedClearDataBase();
         }
         private Task<List<DiscordEmbed>> GetEmbedsWithUserInformations()
         {

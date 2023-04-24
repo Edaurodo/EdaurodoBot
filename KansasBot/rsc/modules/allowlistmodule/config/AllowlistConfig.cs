@@ -1,7 +1,7 @@
 ﻿using KansasBot.rsc.modules.genericmodule.commands.create.embed;
 using Newtonsoft.Json;
 
-namespace KansasBot.rsc.modules.whitelistmodule.config
+namespace KansasBot.rsc.modules.allowlistmodule.config
 {
     public sealed class AllowlistConfig
     {

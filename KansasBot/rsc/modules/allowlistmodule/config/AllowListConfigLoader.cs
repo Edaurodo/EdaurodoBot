@@ -4,7 +4,7 @@ using KansasBot.rsc.utils;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
-namespace KansasBot.rsc.modules.whitelistmodule.config
+namespace KansasBot.rsc.modules.allowlistmodule.config
 {
     public sealed class AllowListConfigLoader
     {

@@ -1,17 +1,16 @@
 ﻿using DSharpPlus.Entities;
 
-namespace KansasBot.rsc.modules.whitelistmodule.data
+namespace KansasBot.rsc.modules.allowlistmodule.data
 {
     public sealed class AllowlistData
     {
-        private List<uint>? ResponseList;
+        private List<uint>? ResponsesList;
         public Allowlist Allowlist { get; private set; }
         public DiscordChannel? AllowListChannel { get; private set; }
-        public DiscordMessage? AllowListMessage { get; private set; }
         public DateTime? StartAllowlistTime { get; private set; }
         public DateTime? FinishAllowlistTime { get; private set; }
         public int? CurrentQuestion { get; private set; }
-        public uint[]? Response { get; private set; }
+        public uint[]? Responses { get; private set; }
         public string? UserName { get; private set; }
         public string? UserAge { get; private set; }
         public string? UserExp { get; private set; }
@@ -19,20 +18,26 @@ namespace KansasBot.rsc.modules.whitelistmodule.data
         public string? CharName { get; private set; }
         public string? CharLore { get; private set; }
 
-        public AllowlistData(Allowlist allowlist) => this.Allowlist = allowlist;
-
+        public AllowlistData(Allowlist allowlist) => this.Allowlist = allowlist; 
+        public Task ReprovedClearDataBase()
+        {
+            ResponsesList = null;
+            AllowListChannel = null;
+            CurrentQuestion = null;
+            Responses = null;
+            CharAge = null;
+            CharName = null;
+            CharLore = null;
+            return Task.CompletedTask;
+        }
         public Task ClearDataBase()
         {
-            ResponseList = null;
+            ResponsesList = null;
             AllowListChannel = null;
-            AllowListMessage = null;
             StartAllowlistTime = null;
             FinishAllowlistTime = null;
             CurrentQuestion = null;
-            Response = null;
-            UserName = null;
-            UserAge = null;
-            UserExp = null;
+            Responses = null;
             CharAge = null;
             CharName = null;
             CharLore = null;
@@ -64,9 +69,9 @@ namespace KansasBot.rsc.modules.whitelistmodule.data
         }
         public Task SubmitResponse(uint response)
         {
-            this.ResponseList ??= new List<uint>();
-            this.ResponseList.Add(response);
-            this.Response = ResponseList.ToArray();
+            this.ResponsesList ??= new List<uint>();
+            this.ResponsesList.Add(response);
+            this.Responses = ResponsesList.ToArray();
             return Task.CompletedTask;
         }
         public Task IncrementCurrentQuestion()
@@ -78,11 +83,6 @@ namespace KansasBot.rsc.modules.whitelistmodule.data
         public Task SetChannel(DiscordChannel channel)
         {
             this.AllowListChannel = channel;
-            return Task.CompletedTask;
-        }
-        public Task SetMessage(DiscordMessage message)
-        {
-            this.AllowListMessage = message;
             return Task.CompletedTask;
         }
     }

@@ -1,9 +1,9 @@
 ﻿using DSharpPlus.Entities;
 using DSharpPlus;
 using DSharpPlus.SlashCommands;
-using KansasBot.rsc.modules.whitelistmodule.services;
+using KansasBot.rsc.modules.allowlistmodule.services;
 
-namespace KansasBot.rsc.modules.whitelistmodule.commands.update
+namespace KansasBot.rsc.modules.allowlistmodule.commands.update
 {
     public sealed class UpdateReadersChannels
     {
