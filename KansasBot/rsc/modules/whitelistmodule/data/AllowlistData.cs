@@ -43,11 +43,6 @@ namespace KansasBot.rsc.modules.whitelistmodule.data
             StartAllowlistTime = DateTime.Now.ToUniversalTime();
             return Task.CompletedTask;
         }
-        public Task SetFinishAllowlistTimeNull()
-        {
-            FinishAllowlistTime = null;
-            return Task.CompletedTask;
-        }
         public Task SubmitFinishAllowlistTime()
         {
             FinishAllowlistTime = DateTime.Now.ToUniversalTime();

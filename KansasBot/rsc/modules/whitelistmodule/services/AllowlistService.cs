@@ -32,12 +32,11 @@ namespace KansasBot.rsc.modules.whitelistmodule.services
                     case "btn_AlStart":
                         if (!Data.ContainsKey(s.Interaction.User.Id))
                         {
-                            Console.WriteLine("ADICIONOU UMA NOVA INSTANCIA DE ALLOWLISTDATA");
-                            if (Data.TryAdd(s.Interaction.User.Id, new AllowlistData(new Allowlist(this, s)))) { await Data[s.Interaction.User.Id].Allowlist.ExecuteAsync(); }
+                            if (Data.TryAdd(s.Interaction.User.Id, new AllowlistData(new Allowlist(this, s))))
+                            { await Data[s.Interaction.User.Id].Allowlist.ExecuteAsync(); }
                         }
                         else
                         {
-                            Console.WriteLine("NÃO ADICIONOU UMA NOVA INSTANCIA DE ALLOWLISTDATA");
                             await Data[s.Interaction.User.Id].Allowlist.UpdateInteraction(s.Interaction);
                             await Data[s.Interaction.User.Id].Allowlist.ExecuteAsync();
                         }
@@ -50,7 +49,11 @@ namespace KansasBot.rsc.modules.whitelistmodule.services
                         }
                         break;
                     case "btn_AlReproved":
-                        await Data[s.Interaction.User.Id].Allowlist.UpdateInteraction(s.Interaction);
+                        if (ulong.TryParse(s.Channel.Name.Substring(s.Channel.Name.IndexOf('-') + 1), out var idr))
+                        {
+                            await Data[idr].Allowlist.UpdateInteraction(s.Interaction);
+                            await Data[idr].Allowlist.AllowlistReprovedModal();
+                        }
                         break;
                     case "btn_openRealInfoModal":
                         await Data[s.Interaction.User.Id].Allowlist.UpdateInteraction(s.Interaction);
@@ -63,8 +66,9 @@ namespace KansasBot.rsc.modules.whitelistmodule.services
                     case "select_AlAlternativesResponse":
                         if (Data.ContainsKey(s.Interaction.User.Id))
                         {
-                            await Data[s.Interaction.User.Id].SubmitResponse(uint.Parse(s.Values[0]));
                             await Data[s.Interaction.User.Id].Allowlist.UpdateInteraction(s.Interaction);
+                            await Data[s.Interaction.User.Id].SubmitResponse(uint.Parse(s.Values[0]));
+                            await Data[s.Interaction.User.Id].IncrementCurrentQuestion();
                             await Data[s.Interaction.User.Id].Allowlist.ExecuteAsync();
                         }
                         break;
@@ -84,10 +88,10 @@ namespace KansasBot.rsc.modules.whitelistmodule.services
                             s.Values.TryGetValue("AlRealName", out string realname);
                             s.Values.TryGetValue("AlRealAge", out string realage);
                             s.Values.TryGetValue("AlExp", out string rpexp);
-                            await Data[s.Interaction.User.Id].Allowlist.ChangeForm();
+                            await Data[s.Interaction.User.Id].Allowlist.NextForm();
                             await Data[s.Interaction.User.Id].Allowlist.UpdateInteraction(s.Interaction);
                             await Data[s.Interaction.User.Id].SubmitRealInfo(realname, realage, rpexp);
-                            await Data[s.Interaction.User.Id].Allowlist.SendFormToUser();
+                            await Data[s.Interaction.User.Id].Allowlist.ExecuteAsync();
                         }
                         break;
                     case "modal_CharInfoModal":
@@ -96,9 +100,21 @@ namespace KansasBot.rsc.modules.whitelistmodule.services
                             s.Values.TryGetValue("AlCharName", out string charname);
                             s.Values.TryGetValue("AlCharAge", out string charage);
                             s.Values.TryGetValue("AlCharLore", out string charlore);
+                            await Data[s.Interaction.User.Id].Allowlist.NextForm();
                             await Data[s.Interaction.User.Id].Allowlist.UpdateInteraction(s.Interaction);
                             await Data[s.Interaction.User.Id].SubmitCharInfo(charage, charname, charlore);
-                            await Data[s.Interaction.User.Id].Allowlist.FinalizeAllowlistQuizAsync(true);
+                            await Data[s.Interaction.User.Id].Allowlist.ExecuteAsync();
+                        }
+                        break;
+                    case "modal_Reproved":
+                        if (ulong.TryParse(s.Interaction.Channel.Name.Substring(s.Interaction.Channel.Name.IndexOf('-') + 1), out var id))
+                        {
+                            if (Data.ContainsKey(id))
+                            {
+                                await Data[id].Allowlist.UpdateInteraction(s.Interaction);
+                                s.Values.TryGetValue("AlReasons", out string reasons);
+                                await Data[id].Allowlist.AllowlistReproved(reasons);
+                            }
                         }
                         break;
                 }
