@@ -1,4 +1,5 @@
 ﻿using DSharpPlus;
+using KansasBot.rsc.modules.allowlistmodule.utilities;
 using KansasBot.rsc.modules.genericmodule.commands.create.embed;
 using KansasBot.rsc.utils;
 using Microsoft.Extensions.Logging;
@@ -8,7 +9,7 @@ namespace KansasBot.rsc.modules.allowlistmodule.config
 {
     public sealed class AllowListConfigLoader
     {
-        private string ConfigPath = Path.Combine(new[] { KansasPaths.ConfigPath, "allowlist.cfg.json" });
+        private string ConfigArchive = Path.Combine(new[] { AllowlistUtilities.ConfigPath, "allowlist.cfg.json" });
         private DiscordClient Client;
 
         public AllowListConfigLoader(DiscordClient client)
@@ -17,7 +18,11 @@ namespace KansasBot.rsc.modules.allowlistmodule.config
         }
         public async Task<AllowlistConfig> LoadConfigAsync()
         {
-            FileInfo file = new FileInfo(ConfigPath);
+            if (!Directory.Exists(AllowlistUtilities.ConfigPath)) { Directory.CreateDirectory(AllowlistUtilities.ConfigPath); }
+            if (!Directory.Exists(AllowlistUtilities.DataPath)) { Directory.CreateDirectory(AllowlistUtilities.DataPath); }
+
+
+            FileInfo file = new FileInfo(ConfigArchive);
             if (file == null || !file.Exists)
             {
                 await SerializeNewConfig(file);
@@ -74,6 +79,7 @@ namespace KansasBot.rsc.modules.allowlistmodule.config
             {
                 await sw.WriteLineAsync(json);
                 await sw.FlushAsync();
+                sw.Close();
             }
         }
         private async Task<AllowlistConfig> DeserializeConfig(FileInfo file)
