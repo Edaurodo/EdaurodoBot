@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace KansasBot.rsc.modules.genericmodule.commands.create.embed
+namespace EdaurodoBot.rsc.modules.genericmodule.commands.create.embed
 {
     public sealed class Embed
     {

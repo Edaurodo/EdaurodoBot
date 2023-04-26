@@ -2,7 +2,7 @@
 using DSharpPlus.SlashCommands;
 using DSharpPlus;
 
-namespace KansasBot.rsc.modules.genericmodule.commands.info.emoji
+namespace EdaurodoBot.rsc.modules.genericmodule.commands.info.emoji
 {
     public sealed class EmojiCommand
     {

@@ -1,8 +1,8 @@
 ﻿using DSharpPlus;
 using DSharpPlus.SlashCommands;
-using KansasBot.rsc.modules.genericmodule.commands.info.emoji;
+using EdaurodoBot.rsc.modules.genericmodule.commands.info.emoji;
 
-namespace KansasBot.rsc.modules.genericmodule.commands.info
+namespace EdaurodoBot.rsc.modules.genericmodule.commands.info
 {
     [SlashCommandGroup("info", "Comando para obter informações"), SlashCommandPermissions(Permissions.Administrator)]
     public sealed class InfoCommand : ApplicationCommandModule

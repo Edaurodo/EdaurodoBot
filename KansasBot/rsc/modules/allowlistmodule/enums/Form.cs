@@ -1,6 +1,6 @@
-﻿namespace KansasBot.rsc.modules.allowlistmodule.enums
+﻿namespace EdaurodoBot.rsc.modules.allowlistmodule.enums
 {
-    public enum  Form : int
+    public enum Form : int
     {
         User = 1,
         Character = 2,

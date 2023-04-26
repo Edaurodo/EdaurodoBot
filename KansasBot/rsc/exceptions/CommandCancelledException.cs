@@ -1,4 +1,4 @@
-﻿namespace KansasBot.rsc.exceptions
+﻿namespace EdaurodoBot.rsc.exceptions
 {
     public sealed class CommandCancelledException : Exception
     {

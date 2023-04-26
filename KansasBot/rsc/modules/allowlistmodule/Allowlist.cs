@@ -1,17 +1,17 @@
 ﻿using DSharpPlus;
 using DSharpPlus.Entities;
-using KansasBot.rsc.modules.allowlistmodule.config;
-using KansasBot.rsc.modules.allowlistmodule.data;
-using KansasBot.rsc.modules.allowlistmodule.enums;
+using EdaurodoBot.rsc.modules.allowlistmodule.config;
+using EdaurodoBot.rsc.modules.allowlistmodule.data;
+using EdaurodoBot.rsc.modules.allowlistmodule.enums;
 
-namespace KansasBot.rsc.modules.allowlistmodule
+namespace EdaurodoBot.rsc.modules.allowlistmodule
 {
     public sealed class Allowlist
     {
         public static async Task ExecuteAsync(AllowlistData data, AllowlistConfig config)
         {
             var allowlist = new Allowlist();
-            if (data.StartAllowlistTime == null || data.FinishAllowlistTime == null || data.FinishAllowlistTime.Value.Subtract(DateTime.Now.ToUniversalTime()).TotalMinutes < config.ReprovedWaitTime * (-1))
+            if (data.StartAllowlistTime == null || data.FinishAllowlistTime == null || data.FinishAllowlistTime.Value.Subtract(DateTime.Now.ToUniversalTime()).TotalMinutes < config.ReprovedWaitTime * -1)
             {
                 if (data.StartAllowlistTime == null)
                 {
@@ -28,11 +28,11 @@ namespace KansasBot.rsc.modules.allowlistmodule
                 if (data.CurrentQuestion < config.Questions.Length) { await allowlist.UpdateMessageQuiz(data, config); }
                 else
                 {
-                    if (await allowlist.QuizApproved(data, config)) { if ((int)data.CurrentForm <= 2) { await allowlist.SendFormToUser(data.Interaction,config, data.CurrentForm); } else { await allowlist.FinalizeAllowlist(data, config, true); } }
+                    if (await allowlist.QuizApproved(data, config)) { if ((int)data.CurrentForm <= 2) { await allowlist.SendFormToUser(data.Interaction, config, data.CurrentForm); } else { await allowlist.FinalizeAllowlist(data, config, true); } }
                     else { await allowlist.FinalizeAllowlist(data, config, false); }
                 }
             }
-            else
+            else 
             {
                 await data.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
                 .AddEmbed(new DiscordEmbedBuilder()
@@ -229,7 +229,7 @@ namespace KansasBot.rsc.modules.allowlistmodule
                     new DiscordButtonComponent(ButtonStyle.Success, "btn_AlApproved", "Aprovar Allowlist", false)}));
         }
         private async Task CreateAllowlistChannel(AllowlistData data, AllowlistConfig config)
-        { 
+        {
             await data.SubmitStartAllowlistTime();
 
             await data.SetAllowlistChannel(data.Guild.CreateChannelAsync(

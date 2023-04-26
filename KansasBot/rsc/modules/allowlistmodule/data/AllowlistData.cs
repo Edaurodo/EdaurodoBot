@@ -1,8 +1,8 @@
 ﻿using DSharpPlus.Entities;
-using KansasBot.rsc.modules.allowlistmodule.enums;
+using EdaurodoBot.rsc.modules.allowlistmodule.enums;
 using Newtonsoft.Json;
 
-namespace KansasBot.rsc.modules.allowlistmodule.data
+namespace EdaurodoBot.rsc.modules.allowlistmodule.data
 {
     public sealed class AllowlistData
     {
@@ -61,19 +61,19 @@ namespace KansasBot.rsc.modules.allowlistmodule.data
 
         public AllowlistData(DiscordInteraction interaction)
         {
-            this.Interaction = interaction;
-            this.User = interaction.User;
-            this.Guild = interaction.Guild;
-            this.Member = interaction.Guild.Members[User.Id];
-            this.CurrentForm = Form.User;
+            Interaction = interaction;
+            User = interaction.User;
+            Guild = interaction.Guild;
+            Member = interaction.Guild.Members[User.Id];
+            CurrentForm = Form.User;
         }
 
         public Task UpdateInteraction(DiscordInteraction interaction)
         {
-            this.Interaction = interaction;
+            Interaction = interaction;
             return Task.CompletedTask;
         }
-         
+
         public Task ReprovedClearDataBase()
         {
             ResponsesList = null;
@@ -103,7 +103,7 @@ namespace KansasBot.rsc.modules.allowlistmodule.data
 
         public Task UpdateCurrentForm(Form form)
         {
-            this.CurrentForm = form;
+            CurrentForm = form;
             return Task.CompletedTask;
         }
         public Task SubmitStartAllowlistTime()
@@ -118,34 +118,34 @@ namespace KansasBot.rsc.modules.allowlistmodule.data
         }
         public Task SubmitRealInfo(string? username, string? userage, string? userexp)
         {
-            this.UserName = username;
-            this.UserAge = userage;
-            this.UserExp = userexp;
+            UserName = username;
+            UserAge = userage;
+            UserExp = userexp;
             return Task.CompletedTask;
         }
         public Task SubmitCharInfo(string? charage, string? charname, string? charlore)
         {
-            this.CharName = charname;
-            this.CharAge = charage;
-            this.CharLore = charlore;
+            CharName = charname;
+            CharAge = charage;
+            CharLore = charlore;
             return Task.CompletedTask;
         }
         public Task SubmitResponse(int response)
         {
-            this.ResponsesList ??= new List<int>();
-            this.ResponsesList.Add(response);
-            this.Responses = ResponsesList.ToArray();
+            ResponsesList ??= new List<int>();
+            ResponsesList.Add(response);
+            Responses = ResponsesList.ToArray();
             return Task.CompletedTask;
         }
         public Task IncrementCurrentQuestion()
         {
-            this.CurrentQuestion ??= -1;
-            this.CurrentQuestion++;
+            CurrentQuestion ??= -1;
+            CurrentQuestion++;
             return Task.CompletedTask;
         }
         public Task SetAllowlistChannel(DiscordChannel channel)
         {
-            this.AllowlistUserChannel = channel;
+            AllowlistUserChannel = channel;
             return Task.CompletedTask;
         }
     }

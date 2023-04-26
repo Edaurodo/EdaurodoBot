@@ -1,9 +1,9 @@
 ﻿using DSharpPlus.Entities;
 using DSharpPlus;
 using DSharpPlus.SlashCommands;
-using KansasBot.rsc.modules.allowlistmodule.services;
+using EdaurodoBot.rsc.modules.allowlistmodule.services;
 
-namespace KansasBot.rsc.modules.allowlistmodule.commands.update
+namespace EdaurodoBot.rsc.modules.allowlistmodule.commands.update
 {
     public sealed class UpdateReadersChannels
     {
@@ -74,7 +74,8 @@ namespace KansasBot.rsc.modules.allowlistmodule.commands.update
                 {
                     if (category.Children.Count < tempReaderCategory.Children.Count) { tempReaderCategory = category; }
                 }
-                await channels.First().ModifyAsync(_ => { 
+                await channels.First().ModifyAsync(_ =>
+                {
                     _.Parent = tempReaderCategory;
                     _.PermissionOverwrites = new List<DiscordOverwriteBuilder>() {
                     new DiscordOverwriteBuilder().For(Context.Guild.GetMemberAsync(ulong.Parse(tempReaderCategory.Name.Substring(tempReaderCategory.Name.IndexOf('-')+1))).GetAwaiter().GetResult())
@@ -83,7 +84,7 @@ namespace KansasBot.rsc.modules.allowlistmodule.commands.update
                     .Deny(Permissions.SendMessages),
                     new DiscordOverwriteBuilder().For(Context.Guild.EveryoneRole)
                     .Deny(Permissions.AccessChannels)};
-                }) ;
+                });
                 channels.RemoveAt(0);
             }
         }

@@ -1,8 +1,8 @@
 ﻿using DSharpPlus;
 using DSharpPlus.SlashCommands;
-using KansasBot.rsc.modules.genericmodule.commands.create.embed;
+using EdaurodoBot.rsc.modules.genericmodule.commands.create.embed;
 
-namespace KansasBot.rsc.modules.genericmodule.commands.create
+namespace EdaurodoBot.rsc.modules.genericmodule.commands.create
 {
 
     [SlashCommandGroup("create", "Use de acordo com sua criatividade"), SlashCommandPermissions(Permissions.Administrator)]

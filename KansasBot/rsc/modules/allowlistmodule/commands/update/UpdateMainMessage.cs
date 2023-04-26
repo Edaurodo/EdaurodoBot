@@ -1,12 +1,12 @@
 ﻿using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
-using KansasBot.rsc.modules.genericmodule.commands.create.embed;
-using KansasBot.rsc.modules.allowlistmodule.services;
-using KansasBot.rsc.utils;
 using Newtonsoft.Json;
+using EdaurodoBot.rsc.modules.allowlistmodule.services;
+using EdaurodoBot.rsc.modules.genericmodule.commands.create.embed;
+using EdaurodoBot.rsc.utils;
 
-namespace KansasBot.rsc.modules.allowlistmodule.commands.update
+namespace EdaurodoBot.rsc.modules.allowlistmodule.commands.update
 {
     public sealed class UpdateMainMessage
     {
@@ -30,7 +30,7 @@ namespace KansasBot.rsc.modules.allowlistmodule.commands.update
             var channel = Context.Guild.GetChannel((ulong)Module.Config.Channels.MainId);
             if (channel != null)
             {
-                await channel.SendMessageAsync(new DiscordMessageBuilder().AddEmbed(KansasUtilities.GetEmbedFromJson(_embed, Module.Bot)).AddComponents(GetButtons()));
+                await channel.SendMessageAsync(new DiscordMessageBuilder().AddEmbed(EdaurodoUtilities.GetEmbedFromJson(_embed, Module.Bot)).AddComponents(GetButtons()));
             }
         }
         private IEnumerable<DiscordActionRowComponent> GetButtons()

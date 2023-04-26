@@ -1,9 +1,9 @@
 ﻿using DSharpPlus;
 using DSharpPlus.SlashCommands;
-using KansasBot.rsc.modules.allowlistmodule.commands.update;
-using KansasBot.rsc.modules.allowlistmodule.services;
+using EdaurodoBot.rsc.modules.allowlistmodule.commands.update;
+using EdaurodoBot.rsc.modules.allowlistmodule.services;
 
-namespace KansasBot.rsc.modules.allowlistmodule.commands
+namespace EdaurodoBot.rsc.modules.allowlistmodule.commands
 {
     [SlashCommandGroup("Allowlist", "Comandos da AllowList"), SlashCommandPermissions(Permissions.Administrator)]
     public sealed class AllowlistCommands : ApplicationCommandModule

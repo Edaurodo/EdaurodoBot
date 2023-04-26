@@ -1,16 +1,17 @@
 ﻿using DSharpPlus.Entities;
-using KansasBot.rsc.core;
-using KansasBot.rsc.modules.genericmodule.commands.create.embed;
+using EdaurodoBot.rsc.core;
+using EdaurodoBot.rsc.modules.genericmodule.commands.create.embed;
 using Microsoft.Extensions.Logging;
 using System.Text;
+using System.Text.RegularExpressions;
 
-namespace KansasBot.rsc.utils
+namespace EdaurodoBot.rsc.utils
 {
-    public sealed class KansasUtilities
+    public sealed class EdaurodoUtilities
     {
         public static UTF8Encoding UTF8 { get; } = new UTF8Encoding(false);
 
-        public static DiscordEmbed GetEmbedFromJson(Embed embed, KansasMain Application)
+        public static DiscordEmbed GetEmbedFromJson(Embed embed, EdaurodoMain Application)
         {
             DiscordEmbedBuilder eb = new DiscordEmbedBuilder();
 
@@ -270,7 +271,7 @@ namespace KansasBot.rsc.utils
                                     else
                                     {
                                         if (field.Inline != null && field.Inline == true) { eb.AddField(field.Title, field.Content, true); count++; }
-                                        else { eb.AddField(field.Title, field.Content, false); count++;}
+                                        else { eb.AddField(field.Title, field.Content, false); count++; }
                                     }
                                 }
                                 else
@@ -278,7 +279,8 @@ namespace KansasBot.rsc.utils
                                     Application.Client.Logger.LogError(new EventId(777, "Utilities"), $"Campo null: Não foi possível adicionar 'embed.Fields[{count}].Content', o campo não pode ser nulo verifique os arquivos de configuração");
                                 }
                             }
-                        } else
+                        }
+                        else
                         {
                             Application.Client.Logger.LogError(new EventId(777, "Utilities"), $"Campo null: Não foi possível adicionar 'embed.Fields[{count}].Title', o campo não pode ser nulo verifique os arquivos de configuração");
                         }
@@ -291,28 +293,12 @@ namespace KansasBot.rsc.utils
 
         private static bool ValidateColorHex(string hex)
         {
-            if (hex.Length < 6 || hex.Length > 7) { return false; }
-            hex = hex.ToUpper();
-            char[] hexChars = { '#', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'A', 'B', 'C', 'D', 'E', 'F' };
-            char[] hexarray = hex.ToArray();
-
-            if (hex.Length == 6)
+            if (hex.Length > 5 && hex.Length < 8)
             {
-                if (hexarray[0] == '#') { return false; };
-                for (int i = 0; i < hexarray.Length; i++)
-                {
-                    if (!hexChars.Contains(hexarray[i])) { return false; }
-                }
+                if (Regex.IsMatch(hex, "[#][a-fA-F0-9]{6}|[a-fA-F0-9]{6}")) { return true; }
+                else { return false; }
             }
-            else
-            {
-                if (hexarray[0] != '#') { return false; };
-                for (int i = 0; i < hexarray.Length; i++)
-                {
-                    if (!hexChars.Contains(hexarray[i])) { return false; }
-                }
-            }
-            return true;
+            else { return false; }
         }
     }
 }

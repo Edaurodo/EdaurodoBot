@@ -1,10 +1,10 @@
-﻿using KansasBot.rsc.utils;
+﻿using EdaurodoBot.rsc.utils;
 
-namespace KansasBot.rsc.modules.allowlistmodule.utilities
+namespace EdaurodoBot.rsc.modules.allowlistmodule.utilities
 {
     public sealed class AllowlistUtilities
     {
-        public static string DataPath = Path.Combine(new[] { KansasPaths.DataPath, "allowlist_data"});
-        public static string ConfigPath = Path.Combine(new[] { KansasPaths.ConfigPath, "allowlist_config" });
+        public static string ConfigPath = Path.Combine(new[] { EdaurodoPaths.Config, "allowlist_config" });
+        public static string DataPath = Path.Combine(new[] { EdaurodoPaths.Data, "allowlist_data" });
     }
 }

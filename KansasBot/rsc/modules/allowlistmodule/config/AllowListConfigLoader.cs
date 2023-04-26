@@ -1,20 +1,19 @@
 ﻿using DSharpPlus;
-using KansasBot.rsc.modules.allowlistmodule.utilities;
-using KansasBot.rsc.modules.genericmodule.commands.create.embed;
-using KansasBot.rsc.utils;
+using EdaurodoBot.rsc.modules.allowlistmodule.utilities;
+using EdaurodoBot.rsc.modules.genericmodule.commands.create.embed;
+using EdaurodoBot.rsc.utils;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
-namespace KansasBot.rsc.modules.allowlistmodule.config
+namespace EdaurodoBot.rsc.modules.allowlistmodule.config
 {
     public sealed class AllowListConfigLoader
     {
         private string ConfigArchive = Path.Combine(new[] { AllowlistUtilities.ConfigPath, "allowlist.cfg.json" });
         private DiscordClient Client;
-
         public AllowListConfigLoader(DiscordClient client)
         {
-            this.Client = client;
+            Client = client;
         }
         public async Task<AllowlistConfig> LoadConfigAsync()
         {
@@ -75,7 +74,7 @@ namespace KansasBot.rsc.modules.allowlistmodule.config
                 ));
 
             string json = JsonConvert.SerializeObject(config, Formatting.Indented);
-            using (StreamWriter sw = new StreamWriter(file.Create(), KansasUtilities.UTF8))
+            using (StreamWriter sw = new StreamWriter(file.Create(), EdaurodoUtilities.UTF8))
             {
                 await sw.WriteLineAsync(json);
                 await sw.FlushAsync();
@@ -85,7 +84,7 @@ namespace KansasBot.rsc.modules.allowlistmodule.config
         private async Task<AllowlistConfig> DeserializeConfig(FileInfo file)
         {
             string json = "{}";
-            using (StreamReader sr = new StreamReader(file.OpenRead(), KansasUtilities.UTF8))
+            using (StreamReader sr = new StreamReader(file.OpenRead(), EdaurodoUtilities.UTF8))
             {
                 json = await sr.ReadToEndAsync();
                 sr.Close();
@@ -106,7 +105,7 @@ namespace KansasBot.rsc.modules.allowlistmodule.config
                             {
                                 foreach (var question in config.Questions)
                                 {
-                                    if (question.Question == null || question.Alternatives == null || question.Alternatives.Length < 1 || question.CorrectAnswer == null || (question.CorrectAnswer < 1 || question.CorrectAnswer > question.Alternatives.Length))
+                                    if (question.Question == null || question.Alternatives == null || question.Alternatives.Length < 1 || question.CorrectAnswer == null || question.CorrectAnswer < 1 || question.CorrectAnswer > question.Alternatives.Length)
                                     {
                                         Client.Logger.LogCritical(new EventId(777, "ConfigLoader"), $"ERRO NAS CONFIGURAÇÔES: ALGUM CAMPO EM 'questions' no arquivo 'allowlist.cfg.json' É NULO OU FORA DE CONTEXTO!");
                                         throw new Exception();
@@ -135,7 +134,7 @@ namespace KansasBot.rsc.modules.allowlistmodule.config
                 else { return Task.FromResult(config); }
             }
             else
-            { Client.Logger.LogCritical(new EventId(777, "ConfigLoader"), $"ERRO NAS CONFIGURAÇÔES: NÃO FOI POSSIVEL ENCONTRAR O ARQUIVO'allowlist.cfg.json' EM \n{KansasPaths.ConfigPath}"); throw new Exception(); }
+            { Client.Logger.LogCritical(new EventId(777, "ConfigLoader"), $"ERRO NAS CONFIGURAÇÔES: NÃO FOI POSSIVEL ENCONTRAR O ARQUIVO'allowlist.cfg.json' EM \n{EdaurodoPaths.Config}"); throw new Exception(); }
         }
     }
 }

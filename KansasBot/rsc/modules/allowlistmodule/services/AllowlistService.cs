@@ -1,60 +1,31 @@
 ﻿using DSharpPlus;
 using DSharpPlus.EventArgs;
-using KansasBot.rsc.core;
-using KansasBot.rsc.modules.allowlistmodule.commands;
-using KansasBot.rsc.modules.allowlistmodule.config;
-using KansasBot.rsc.modules.allowlistmodule.data;
-using KansasBot.rsc.modules.allowlistmodule.enums;
-using KansasBot.rsc.modules.allowlistmodule.utilities;
-using KansasBot.rsc.utils;
+using EdaurodoBot.rsc.core;
+using EdaurodoBot.rsc.modules.allowlistmodule.commands;
+using EdaurodoBot.rsc.modules.allowlistmodule.config;
+using EdaurodoBot.rsc.modules.allowlistmodule.data;
+using EdaurodoBot.rsc.modules.allowlistmodule.enums;
+using EdaurodoBot.rsc.modules.allowlistmodule.utilities;
+using EdaurodoBot.rsc.utils;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System.Collections.Concurrent;
 using System.Text;
 
-namespace KansasBot.rsc.modules.allowlistmodule.services
+namespace EdaurodoBot.rsc.modules.allowlistmodule.services
 {
     public sealed class AllowlistService
     {
         public ConcurrentDictionary<ulong, AllowlistData> Data { get; private set; }
-        private ConcurrentDictionary<ulong, AllowlistData>? InternalData;
-        public KansasMain Bot { get; }
+        public EdaurodoMain Bot { get; }
         public AllowlistConfig? Config { get; private set; }
         public AllowListConfigLoader? ConfigLoader { get; private set; }
 
-        public AllowlistService(KansasMain bot)
+        public AllowlistService(EdaurodoMain bot)
         {
             Bot = bot;
             Bot.Client.Ready += Kansas_Ready;
             Data = new ConcurrentDictionary<ulong, AllowlistData>();
-        }
-
-        public Task SaveAllowlistData()
-        {
-            lock (InternalData)
-            {
-                InternalData = Data;
-
-                string json = JsonConvert.SerializeObject(InternalData, Formatting.Indented);
-                FileInfo file = new FileInfo(Path.Combine(new[] { AllowlistUtilities.DataPath, "allowlist.db.json" }));
-                if (file == null || !file.Exists)
-                {
-                    using (StreamWriter sw = new StreamWriter(file.Create(), Encoding.Unicode))
-                    {
-                        sw.WriteLine(json);
-                        sw.Flush();
-                        sw.Close();
-                    }
-                    return Task.CompletedTask;
-                }
-                using (StreamWriter sw = new StreamWriter(file.OpenWrite(), Encoding.Unicode))
-                {
-                    sw.WriteLine(json);
-                    sw.Flush();
-                    sw.Close();
-                }
-                return Task.CompletedTask;
-            }
         }
         private Task Component_Interaction_Created(DiscordClient c, ComponentInteractionCreateEventArgs s)
         {
@@ -173,7 +144,7 @@ namespace KansasBot.rsc.modules.allowlistmodule.services
             }
             else
             {
-                Bot.Client.Logger.LogCritical(new EventId(777, "AllowlistService"), $"ERRO NAS CONFIGURAÇÔES: NÃO FOI POSSIVEL ENCONTRAR O ARQUIVO'allowlist.cfg.json' EM \n{KansasPaths.ConfigPath}");
+                Bot.Client.Logger.LogCritical(new EventId(777, "AllowlistService"), $"ERRO NAS CONFIGURAÇÔES: NÃO FOI POSSIVEL ENCONTRAR O ARQUIVO'allowlist.cfg.json' EM \n{EdaurodoPaths.Config}");
                 await Bot.Client.DisconnectAsync();
                 Bot.Client.Dispose();
                 throw new Exception();

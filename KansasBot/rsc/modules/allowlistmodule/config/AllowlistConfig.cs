@@ -1,7 +1,7 @@
-﻿using KansasBot.rsc.modules.genericmodule.commands.create.embed;
+﻿using EdaurodoBot.rsc.modules.genericmodule.commands.create.embed;
 using Newtonsoft.Json;
 
-namespace KansasBot.rsc.modules.allowlistmodule.config
+namespace EdaurodoBot.rsc.modules.allowlistmodule.config
 {
     public sealed class AllowlistConfig
     {
@@ -26,7 +26,7 @@ namespace KansasBot.rsc.modules.allowlistmodule.config
         [JsonProperty("messages")]
         public AllowlistMessages Messages { get; private set; }
 
-        public AllowlistConfig(bool? use, int? reprovedwaittime,AllowlistRoles roles, AllowlistChannels channels, AllowlistQuestion[]? questions, AllowlistMessages messages)
+        public AllowlistConfig(bool? use, int? reprovedwaittime, AllowlistRoles roles, AllowlistChannels channels, AllowlistQuestion[]? questions, AllowlistMessages messages)
         {
             Use = use ?? false;
             ReprovedWaitTime = reprovedwaittime ?? 60;

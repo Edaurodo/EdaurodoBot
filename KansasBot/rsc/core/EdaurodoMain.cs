@@ -2,27 +2,23 @@
 using DSharpPlus.Interactivity;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.Interactivity.Extensions;
-using KansasBot.rsc.core.data;
-using KansasBot.rsc.modules.genericmodule.commands.info;
-using KansasBot.rsc.modules.genericmodule.commands.create;
 using Microsoft.Extensions.DependencyInjection;
-using KansasBot.rsc.modules.allowlistmodule.commands;
-using KansasBot.rsc.modules.allowlistmodule.services;
+using EdaurodoBot.rsc.modules.genericmodule.commands.info;
+using EdaurodoBot.rsc.modules.allowlistmodule.services;
+using EdaurodoBot.rsc.core.data;
+using EdaurodoBot.rsc.modules.genericmodule.commands.create;
 
-namespace KansasBot.rsc.core
+namespace EdaurodoBot.rsc.core
 {
-    public sealed class KansasMain
+    public sealed class EdaurodoMain
     {
-        public KansasConfig Config { get; }
+        public EdaurodoConfig Config { get; }
         public DiscordClient Client { get; }
         public InteractivityExtension? InteractivityExtension { get; private set; }
-        public SlashCommandsExtension? SlashCommands { get;  set; }
+        public SlashCommandsExtension? SlashCommands { get; set; }
         public IServiceProvider Services { get; private set; }
 
-        //public CommandsNextExtension CommandsNext { get; internal set;
-
-        public AllowlistService Allowlist { get; private set; }
-        public KansasMain(KansasConfig config)
+        public EdaurodoMain(EdaurodoConfig config)
         {
             Config = config;
             Client = new DiscordClient(new DiscordConfiguration()
@@ -34,12 +30,12 @@ namespace KansasBot.rsc.core
                 Intents = DiscordIntents.All,
             });
 
-
             Services = new ServiceCollection()
                 .AddSingleton(new AllowlistService(this))
                 .BuildServiceProvider();
 
             SlashCommands = Client.UseSlashCommands(new SlashCommandsConfiguration() { Services = Services });
+
             InteractivityExtension = Client.UseInteractivity(new InteractivityConfiguration()
             {
                 Timeout = TimeSpan.FromMinutes(3)

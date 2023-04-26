@@ -3,7 +3,7 @@ using DSharpPlus.SlashCommands;
 using DSharpPlus;
 using Newtonsoft.Json;
 
-namespace KansasBot.rsc.modules.genericmodule.commands.create.embed
+namespace EdaurodoBot.rsc.modules.genericmodule.commands.create.embed
 {
     public sealed class EmbedCommand
     {
@@ -706,8 +706,8 @@ namespace KansasBot.rsc.modules.genericmodule.commands.create.embed
                 DiscordComponentEmoji emoji_delete = new DiscordComponentEmoji(DiscordEmoji.FromGuildEmote(Client, 1094409217533812788));
                 List<DiscordComponent> button_upline = new List<DiscordComponent>() {
 
-                    new DiscordButtonComponent(ButtonStyle.Secondary, $"{Context.Interaction.Id}-btn_editfield", "Editar", (FieldSelect == null), emoji_edit),
-                    new DiscordButtonComponent(ButtonStyle.Secondary, $"{Context.Interaction.Id}-btn_deletefield", "Excluir", (FieldSelect == null), emoji_delete)
+                    new DiscordButtonComponent(ButtonStyle.Secondary, $"{Context.Interaction.Id}-btn_editfield", "Editar", FieldSelect == null, emoji_edit),
+                    new DiscordButtonComponent(ButtonStyle.Secondary, $"{Context.Interaction.Id}-btn_deletefield", "Excluir", FieldSelect == null, emoji_delete)
                 };
                 if (FieldSelect != null)
                 {
