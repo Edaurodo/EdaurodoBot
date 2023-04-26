@@ -1,4 +1,4 @@
-# KansasBot
+# EdaurodoBot
 
 >## Create CommandGroup
 >
