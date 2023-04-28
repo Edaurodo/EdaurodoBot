@@ -104,12 +104,16 @@ namespace EdaurodoBot.rsc.modules.allowlistmodule.config
         [JsonProperty("rule_button_link")]
         public string? ButtonLink { get; private set; }
 
+        [JsonProperty("content")]
+        public string? Content { get; private set; }
+
         [JsonProperty("embed")]
         public Embed Embed { get; private set; }
 
-        public MainMessage(string? buttonlink, Embed? embed)
+        public MainMessage(string? buttonlink,string? content, Embed? embed)
         {
             ButtonLink = buttonlink;
+            Content = content;
             Embed = embed ?? new Embed()
             {
                 Color = "#2B2D31",

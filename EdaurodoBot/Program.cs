@@ -1,10 +1,5 @@
 ﻿using EdaurodoBot.rsc.core;
 using EdaurodoBot.rsc.core.data;
-using EdaurodoBot.rsc.modules.allowlistmodule.data;
-using EdaurodoBot.rsc.modules.allowlistmodule.utilities;
-using EdaurodoBot.rsc.utils;
-using Newtonsoft.Json;
-
 
 try
 {
@@ -15,9 +10,10 @@ try
 catch (Exception ex)
 {
     Console.WriteLine(
-        $"\n\nMessage: {ex.Message}" +
-        $"\n\nSource: {ex.Source}" +
-        $"\n\nInner Exception: {ex.InnerException}" +
-        $"\n\nTarget Site: {ex.TargetSite}" +
-        $"\n\nStack Trace: {ex.StackTrace}\n\n");
+        $"Message: {ex.Message}" +
+        $"\nSource: {ex.Source}" +
+        $"\nTarget Site: {ex.TargetSite}" +
+        $"\nStack Trace: {ex.StackTrace}\n" +
+        $"Pressione qualquer botão para sair...");
+    Console.ReadKey();
 }

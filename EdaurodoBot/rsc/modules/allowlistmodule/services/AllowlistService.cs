@@ -165,7 +165,7 @@ namespace EdaurodoBot.rsc.modules.allowlistmodule.services
             {
                 if (Config.Use)
                 {
-                    Bot.SlashCommands.RegisterCommands<AllowlistCommands>();
+                    Bot.SlashCommands.RegisterCommands<AllowlistCommands>(Bot.Config.InternalConfig.GuildId);
                     Bot.SlashCommands.RefreshCommands();
                     Bot.Client.ComponentInteractionCreated += Component_Interaction_Created;
                     Bot.Client.ModalSubmitted += Modal_Submitted;
@@ -183,17 +183,19 @@ namespace EdaurodoBot.rsc.modules.allowlistmodule.services
         }
         private Task Edaurodo_GuildDownloadCompleted(DiscordClient sender, GuildDownloadCompletedEventArgs args)
         {
-            sender.GetChannelAsync((ulong)Config.Channels.CategoryId)
-                .GetAwaiter().GetResult().Children.ToList()
+            args.Guilds[Bot.Config.InternalConfig.GuildId].Channels[(ulong)Config.Channels.CategoryId].Children
+                .ToList()
                 .FindAll(_ => _.Type == ChannelType.Text && _.Id != Config.Channels.MainId && _.Id != Config.Channels.ApprovedId && _.Id != Config.Channels.ReprovedId && _.Id != Config.Channels.InterviewId)
                 .ForEach(_ =>
                 {
-                    _.Guild.Channels[(ulong)Config.Channels.MainId]
-                    .DeleteOverwriteAsync(_.Guild.Members[ulong.Parse(_.Name.Substring(_.Name.IndexOf('-') + 1))]);
-                    _.DeleteAsync();
+                    if (_ != null)
+                    {
+                        _.Guild.Channels[(ulong)Config.Channels.MainId]
+                        .DeleteOverwriteAsync(_.Guild.Members[ulong.Parse(_.Name.Substring(_.Name.IndexOf('-') + 1))]);
+                        _.DeleteAsync();
+                    }
                 });
 
-            // Guild.GetChannel((ulong)config.Channels.MainId).DeleteOverwriteAsync(allowlist.Member);
             return Task.CompletedTask;
         }
     }

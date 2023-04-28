@@ -74,6 +74,7 @@ namespace EdaurodoBot.rsc.modules.allowlistmodule.config
                 messages: new AllowlistMessages(
                     mainmessage: new MainMessage(
                         buttonlink: "https://youtu.be/Sagg08DrO5U?t=0",
+                        content: null,
                         embed: new Embed()
                         {
                             Color = "#2B2D31",

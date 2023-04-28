@@ -41,8 +41,8 @@ namespace EdaurodoBot.rsc.core
                 Timeout = TimeSpan.FromMinutes(3)
             });
 
-            SlashCommands.RegisterCommands<CreateCommand>();
-            SlashCommands.RegisterCommands<InfoCommand>();
+            SlashCommands.RegisterCommands<CreateCommand>(Config.InternalConfig.GuildId);
+            SlashCommands.RegisterCommands<InfoCommand>(Config.InternalConfig.GuildId);
 
         }
         public async Task<Task> StartAsync()

@@ -5,6 +5,9 @@ namespace EdaurodoBot.rsc.core.data
 {
     public sealed class EdaurodoConfig
     {
+        [JsonIgnore]
+        public DevConfig InternalConfig { get; private set; }
+
         // 0 - Trace | 1 - Debug | 2 - Information | 3 - Warning | 4 - Error | 5 - Critical | 6 - None
         [JsonProperty("loglevel")]
         public LogLevel MinimumLogLevel { get; private set; }
@@ -12,10 +15,21 @@ namespace EdaurodoBot.rsc.core.data
         [JsonProperty("discord")]
         public EdaurodoConfigDiscord Discord { get; private set; }
 
-        public EdaurodoConfig() { 
-        
+        public EdaurodoConfig()
+        {
+            this.InternalConfig = new DevConfig();
             this.MinimumLogLevel = LogLevel.Information;
             this.Discord = new EdaurodoConfigDiscord();
+        }
+    }
+
+    public sealed class DevConfig
+    {
+        public ulong GuildId { get; private set; }
+
+        public DevConfig()
+        {
+            this.GuildId = 1097821267085758504; //Dummy World - Test Server
         }
     }
 

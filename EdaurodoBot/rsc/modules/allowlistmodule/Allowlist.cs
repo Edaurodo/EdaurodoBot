@@ -210,7 +210,7 @@ namespace EdaurodoBot.rsc.modules.allowlistmodule
                     .WithFooter("📄 Sistema de Allowlist - Kansas Roleplay")
                     .Build())
                     .AddComponents(await GetButtonRules(config)));
-                await ShowAllowlistChannel(data, config, allowlist);
+                await ShowAllowlistChannel(config, allowlist);
 
                 await DeleteChannelAsync(data.AllowlistUserChannel);
             }
@@ -291,14 +291,10 @@ namespace EdaurodoBot.rsc.modules.allowlistmodule
         }
         private async Task<bool> TryModifyApprovedAllowlistUserAsync(AllowlistData data, AllowlistConfig config, Allowlist allowlist)
         {
-            if (allowlist.Member != null)
+            if (allowlist.Guild.Members.ContainsKey(data.DiscordUser.Id))
             {
-                List<DiscordRole> roles = allowlist.Member.Roles.ToList();
-                if (roles.Contains(allowlist.Guild.GetRole((ulong)config.Roles.AllowlistSentId)))
-                {
-                    roles.Remove(allowlist.Guild.GetRole((ulong)config.Roles.AllowlistSentId));
-                }
-                roles.Add(allowlist.Guild.GetRole((ulong)config.Roles.WaitingInterviewId));
+                List<DiscordRole> roles = allowlist.Member.Roles.ToList().FindAll(_ => _.Id != (ulong)config.Roles.AllowlistSentId);
+                roles.Add(allowlist.Guild.Roles[(ulong)config.Roles.WaitingInterviewId]);
                 await allowlist.Member.ModifyAsync(_ => _.Roles = roles);
                 return true;
             }
@@ -306,26 +302,21 @@ namespace EdaurodoBot.rsc.modules.allowlistmodule
         }
         private async Task<bool> TryModifyReprovedAllowlistUserAsync(AllowlistData data, AllowlistConfig config, Allowlist allowlist)
         {
-            if (allowlist.Member != null)
+            if (allowlist.Guild.Members.ContainsKey(data.DiscordUser.Id))
             {
-                List<DiscordRole> roles = allowlist.Member.Roles.ToList();
-                if (roles.Contains(allowlist.Guild.GetRole((ulong)config.Roles.AllowlistSentId)))
-                {
-                    roles.Remove(allowlist.Guild.GetRole((ulong)config.Roles.AllowlistSentId));
-                }
-                await allowlist.Member.ModifyAsync(_ => _.Roles = roles);
-                await ShowAllowlistChannel(data, config, allowlist);
+                await allowlist.Member.ModifyAsync(_ => _.Roles = allowlist.Member.Roles.ToList().FindAll(_ => _.Id != (ulong)config.Roles.AllowlistSentId));
+                await ShowAllowlistChannel(config, allowlist);
                 return true;
             }
             return false;
         }
+        private async Task ShowAllowlistChannel(AllowlistConfig config, Allowlist allowlist)
+        {
+            await allowlist.Guild.Channels[(ulong)config.Channels.MainId].DeleteOverwriteAsync(allowlist.Member);
+        }
         private async Task HideAllowlistChannel(AllowlistData data, AllowlistConfig config, Allowlist allowlist)
         {
             await allowlist.Guild.GetChannel((ulong)config.Channels.MainId).AddOverwriteAsync(allowlist.Member, Permissions.None, Permissions.AccessChannels);
-        }
-        private async Task ShowAllowlistChannel(AllowlistData data, AllowlistConfig config, Allowlist allowlist)
-        {
-            await allowlist.Guild.GetChannel((ulong)config.Channels.MainId).DeleteOverwriteAsync(allowlist.Member);
         }
         private Task DeleteChannelAsync(DiscordChannel channel)
         {
