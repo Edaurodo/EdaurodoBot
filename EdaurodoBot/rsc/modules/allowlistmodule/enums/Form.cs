@@ -2,8 +2,8 @@
 {
     public enum Form : int
     {
-        User = 1,
-        Character = 2,
-        None = 3
+        User = 0,
+        Character = 1,
+        None = 2
     }
 }

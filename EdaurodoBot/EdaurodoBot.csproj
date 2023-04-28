@@ -8,7 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="rsc\modules\discordutilitiesmodule\" />
     <Folder Include="rsc\services\" />
   </ItemGroup>
 

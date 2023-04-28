@@ -1,4 +1,5 @@
 ﻿using DSharpPlus;
+using EdaurodoBot.rsc.modules.allowlistmodule.data;
 using EdaurodoBot.rsc.modules.allowlistmodule.utilities;
 using EdaurodoBot.rsc.modules.genericmodule.commands.create.embed;
 using EdaurodoBot.rsc.utils;
@@ -9,27 +10,40 @@ namespace EdaurodoBot.rsc.modules.allowlistmodule.config
 {
     public sealed class AllowListConfigLoader
     {
-        private string ConfigArchive = Path.Combine(new[] { AllowlistUtilities.ConfigPath, "allowlist.cfg.json" });
+        private string ConfigFile = Path.Combine(new[] { AllowlistUtilities.PathConfig, "allowlist.cfg.json" });
+        private string DataFile = Path.Combine(new[] { AllowlistUtilities.PathData, "allowlist.db.json" });
+
         private DiscordClient Client;
         public AllowListConfigLoader(DiscordClient client)
         {
             Client = client;
         }
+        public async Task<List<AllowlistData>> LoadDataAsync()
+        {
+            if (!Directory.Exists(AllowlistUtilities.PathData)) { Directory.CreateDirectory(AllowlistUtilities.PathData); }
+
+            FileInfo dataFile = new FileInfo(this.DataFile);
+
+            if (!dataFile.Exists)
+            {
+                await SerializeNewDataFile(dataFile);
+            }
+            return await DeserializeData(dataFile);
+        }
         public async Task<AllowlistConfig> LoadConfigAsync()
         {
-            if (!Directory.Exists(AllowlistUtilities.ConfigPath)) { Directory.CreateDirectory(AllowlistUtilities.ConfigPath); }
-            if (!Directory.Exists(AllowlistUtilities.DataPath)) { Directory.CreateDirectory(AllowlistUtilities.DataPath); }
+            if (!Directory.Exists(AllowlistUtilities.PathConfig)) { Directory.CreateDirectory(AllowlistUtilities.PathConfig); }
 
+            FileInfo configFile = new FileInfo(ConfigFile);
 
-            FileInfo file = new FileInfo(ConfigArchive);
-            if (file == null || !file.Exists)
+            if (!configFile.Exists)
             {
-                await SerializeNewConfig(file);
+                await SerializeNewConfigFile(configFile);
                 throw new Exception();
             }
-            else { return await DeserializeConfig(file); }
+            return await DeserializeConfig(configFile);
         }
-        private async Task SerializeNewConfig(FileInfo file)
+        private async Task SerializeNewConfigFile(FileInfo file)
         {
             Client.Logger.LogError(new EventId(777, "ConfigLoader"), "Arquivo não existe: 'allowlist.cfg.json' criado novo arquivo de configuração, configure o modulo e reinicie a aplicação");
 
@@ -76,7 +90,18 @@ namespace EdaurodoBot.rsc.modules.allowlistmodule.config
             string json = JsonConvert.SerializeObject(config, Formatting.Indented);
             using (StreamWriter sw = new StreamWriter(file.Create(), EdaurodoUtilities.UTF8))
             {
-                await sw.WriteLineAsync(json);
+                await sw.WriteAsync(json);
+                await sw.FlushAsync();
+                sw.Close();
+            }
+        }
+        private async Task SerializeNewDataFile(FileInfo file)
+        {
+            string json = "[]";
+
+            using (StreamWriter sw = new StreamWriter(file.Create(), EdaurodoUtilities.UTF8))
+            {
+                await sw.WriteAsync(json);
                 await sw.FlushAsync();
                 sw.Close();
             }
@@ -90,6 +115,24 @@ namespace EdaurodoBot.rsc.modules.allowlistmodule.config
                 sr.Close();
             }
             return await ValidateConfig(JsonConvert.DeserializeObject<AllowlistConfig>(json));
+        }
+        private async Task<List<AllowlistData>> DeserializeData(FileInfo file)
+        {
+            string json = "[]";
+            using (StreamReader sr = new StreamReader(file.OpenRead(), EdaurodoUtilities.UTF8))
+            {
+                json = await sr.ReadToEndAsync();
+                sr.Close();
+            }
+            return await ValidateData(JsonConvert.DeserializeObject<List<AllowlistData>>(json));
+        }
+        private Task<List<AllowlistData>> ValidateData(List<AllowlistData>? data)
+        {
+            if (data != null && data.Count > 0)
+            {
+                return Task.FromResult(data);
+            }
+            return Task.FromResult(new List<AllowlistData>());
         }
         public Task<AllowlistConfig> ValidateConfig(AllowlistConfig? config)
         {

@@ -1,42 +1,36 @@
 ﻿using DSharpPlus.Entities;
 using EdaurodoBot.rsc.modules.allowlistmodule.enums;
 using Newtonsoft.Json;
+using System.Diagnostics;
 
 namespace EdaurodoBot.rsc.modules.allowlistmodule.data
 {
     public sealed class AllowlistData
     {
-        [JsonProperty("interaction")]
-        public DiscordInteraction Interaction { get; private set; }
+        [JsonIgnore]
+        public DiscordInteraction? Interaction { get; private set; }
 
-        [JsonProperty("user")]
-        public DiscordUser User { get; private set; }
+        [JsonIgnore]
+        public DiscordChannel? AllowlistUserChannel { get; private set; }
 
-        [JsonProperty("guild")]
-        public DiscordGuild Guild { get; private set; }
+        [JsonIgnore]
+        public int? CurrentQuestion { get; private set; }
 
-        [JsonProperty("member")]
-        public DiscordMember Member { get; private set; }
+        [JsonIgnore]
+        public int[]? Responses { get; private set; }
 
+        [JsonIgnore]
+        public Form CurrentForm { get; private set; }
 
-
-        [JsonProperty("internal_responses_list")]
+        [JsonIgnore]
         private List<int>? ResponsesList;
 
-        [JsonProperty("user_allowlist_channel")]
-        public DiscordChannel? AllowlistUserChannel { get; private set; }
 
         [JsonProperty("start_time")]
         public DateTime? StartAllowlistTime { get; private set; }
 
         [JsonProperty("finish_time")]
         public DateTime? FinishAllowlistTime { get; private set; }
-
-        [JsonProperty("current_question")]
-        public int? CurrentQuestion { get; private set; }
-
-        [JsonProperty("responses")]
-        public int[]? Responses { get; private set; }
 
         [JsonProperty("user_name")]
         public string? UserName { get; private set; }
@@ -56,15 +50,12 @@ namespace EdaurodoBot.rsc.modules.allowlistmodule.data
         [JsonProperty("char_lore")]
         public string? CharLore { get; private set; }
 
-        [JsonProperty("current_form")]
-        public Form CurrentForm { get; private set; }
+        [JsonProperty("user")]
+        public DiscordUser DiscordUser { get; private set; }
 
-        public AllowlistData(DiscordInteraction interaction)
+        public AllowlistData(DiscordUser user)
         {
-            Interaction = interaction;
-            User = interaction.User;
-            Guild = interaction.Guild;
-            Member = interaction.Guild.Members[User.Id];
+            DiscordUser = user;
             CurrentForm = Form.User;
         }
 
@@ -73,7 +64,6 @@ namespace EdaurodoBot.rsc.modules.allowlistmodule.data
             Interaction = interaction;
             return Task.CompletedTask;
         }
-
         public Task ReprovedClearDataBase()
         {
             ResponsesList = null;
@@ -83,24 +73,15 @@ namespace EdaurodoBot.rsc.modules.allowlistmodule.data
             CharAge = null;
             CharName = null;
             CharLore = null;
-            CurrentForm = (Form)1;
+            CurrentForm = Form.User;
             return Task.CompletedTask;
         }
-        public Task ClearDataBase()
+        public async Task ClearDataBase()
         {
-            ResponsesList = null;
-            AllowlistUserChannel = null;
+            await ReprovedClearDataBase();
             StartAllowlistTime = null;
             FinishAllowlistTime = null;
-            CurrentQuestion = null;
-            Responses = null;
-            CharAge = null;
-            CharName = null;
-            CharLore = null;
-            CurrentForm = (Form)1;
-            return Task.CompletedTask;
         }
-
         public Task UpdateCurrentForm(Form form)
         {
             CurrentForm = form;
