@@ -7,7 +7,6 @@ using EdaurodoBot.rsc.modules.allowlistmodule.config;
 using EdaurodoBot.rsc.modules.allowlistmodule.data;
 using EdaurodoBot.rsc.modules.allowlistmodule.enums;
 using EdaurodoBot.rsc.modules.allowlistmodule.utilities;
-using EdaurodoBot.rsc.utils;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
@@ -155,45 +154,37 @@ namespace EdaurodoBot.rsc.modules.allowlistmodule.services
             });
             return Task.CompletedTask;
         }
-        private async Task Edaurodo_Ready(DiscordClient sender, ReadyEventArgs args)
+        private Task Edaurodo_Ready(DiscordClient sender, ReadyEventArgs args)
         {
-            ConfigLoader = new AllowListConfigLoader(Bot.Client);
-            Config = await ConfigLoader.LoadConfigAsync();
-            var data = await ConfigLoader.LoadDataAsync();
-            if (Config != null)
+            _ = Task.Run(async () =>
             {
-                if (Config.Use)
+                ConfigLoader = new AllowListConfigLoader(Bot.Client);
+                Config = await ConfigLoader.LoadConfigAsync();
+                var data = await ConfigLoader.LoadDataAsync();
+                if (Config != null && Config.Use)
                 {
                     Bot.Client.GuildDownloadCompleted += Edaurodo_GuildDownloadCompleted;
-                    Bot.Client.MessageCreated += Edaurodo_MessageCreate;
                     Bot.SlashCommands.RegisterCommands<AllowlistCommands>(Bot.Config.InternalConfig.GuildId);
                     Bot.SlashCommands.RefreshCommands();
-                    Bot.Client.ComponentInteractionCreated += Component_Interaction_Created;
-                    Bot.Client.ModalSubmitted += Modal_Submitted;
                     Data = data;
                     Bot.Client.Logger.LogInformation(new EventId(777, "AllowlistService"), "AllowlistModule inicializado: tudo OK;");
                 }
-            }
-            else
-            {
-                Bot.Client.Logger.LogCritical(new EventId(777, "AllowlistService"), $"ERRO NAS CONFIGURAÇÔES: NÃO FOI POSSIVEL ENCONTRAR O ARQUIVO 'allowlist.cfg.json' EM \n{EdaurodoPaths.Config}");
-                await Bot.Client.DisconnectAsync();
-                Bot.Client.Dispose();
-                throw new Exception();
-            }
+            });
+            return Task.CompletedTask;
         }
-        private async Task Edaurodo_GuildDownloadCompleted(DiscordClient sender, GuildDownloadCompletedEventArgs args)
+        private Task Edaurodo_GuildDownloadCompleted(DiscordClient sender, GuildDownloadCompletedEventArgs args)
         {
-            var list = args.Guilds[Bot.Config.InternalConfig.GuildId].Channels[(ulong)Config.Channels.CategoryId].Children
-                .ToList()
-                .FindAll(_ => _.Type == ChannelType.Text && _.Id != (ulong)Config.Channels.MainId && _.Id != (ulong)Config.Channels.ApprovedId && _.Id != (ulong)Config.Channels.ReprovedId && _.Id != (ulong)Config.Channels.InterviewId && _.Id != (ulong)Config.Channels.ChangeNameId);
-            
-            if(list.Count > 0)
-            {
-                foreach(var item in list) {
-                    await item.DeleteAsync();
-                }
-            }
+            Bot.Client.MessageCreated += Edaurodo_MessageCreate;
+            Bot.Client.GuildMemberUpdated += Edaurodo_GuildMemberUpdated;
+            Bot.Client.GuildMemberAdded += Edaurodo_GuildMemberAdded;
+
+            Bot.Client.ModalSubmitted += Modal_Submitted;
+            Bot.Client.ComponentInteractionCreated += Component_Interaction_Created;
+
+            args.Guilds[Bot.Config.InternalConfig.GuildId].Channels[(ulong)Config.Channels.CategoryId].Children.ToList()
+                .FindAll(_ => _.Type == 0 && _.Id != (ulong)Config.Channels.MainId && _.Id != (ulong)Config.Channels.ApprovedId && _.Id != (ulong)Config.Channels.ReprovedId && _.Id != (ulong)Config.Channels.InterviewId && _.Id != (ulong)Config.Channels.ChangeNameId)
+                .ForEach(async _ => { await _.DeleteAsync(); });
+            return Task.CompletedTask;
         }
         private Task Edaurodo_MessageCreate(DiscordClient sender, MessageCreateEventArgs args)
         {
@@ -204,12 +195,84 @@ namespace EdaurodoBot.rsc.modules.allowlistmodule.services
                     await args.Guild.Members[args.Author.Id].ModifyAsync(_ =>
                     {
                         _.Nickname = args.Message.Content;
-                        var roles = args.Guild.Members[args.Author.Id].Roles.ToList().FindAll(_ => _.Id != Config.Roles.ApprovedId);
+                        List<DiscordRole> roles = args.Guild.Members[args.Author.Id].Roles.ToList().FindAll(_ => _.Id != Config.Roles.ApprovedId && _.Id != Config.Roles.WaitingInterviewId);
                         roles.Add(args.Guild.Roles[(ulong)Config.Roles.ResidentId]);
                         _.Roles = roles;
                     });
-
                     await args.Message.CreateReactionAsync(DiscordEmoji.FromName(Bot.Client, ":white_check_mark:"));
+                }
+            });
+            return Task.CompletedTask;
+        }
+        private Task Edaurodo_GuildMemberAdded(DiscordClient sender, GuildMemberAddEventArgs args)
+        {
+            _ = Task.Run(async () =>
+            {
+                await args.Member.ModifyAsync(_ =>
+                {
+                    List<DiscordRole> roles = args.Member.Roles.ToList();
+                    roles.Add(args.Guild.GetRole((ulong)Config.Roles.ReprovedId));
+                    _.Roles = roles;
+                });
+            });
+            return Task.CompletedTask;
+        }
+        private Task Edaurodo_GuildMemberUpdated(DiscordClient sender, GuildMemberUpdateEventArgs args)
+        {
+            _ = Task.Run(async () =>
+            {
+                DiscordRole role = args.Guild.GetRole((ulong)Config.Roles.ReaderId);
+
+                if ((!args.MemberBefore.Roles.Contains(role) && args.MemberAfter.Roles.Contains(role)) || (args.MemberBefore.Roles.Contains(role) && !args.MemberAfter.Roles.Contains(role)))
+                {
+                    DiscordGuild guild = args.Guild;
+                    List<DiscordMember> readers = guild.Members.Values.ToList().FindAll(_ => _.Roles.Contains(role));
+                    List<DiscordChannel> readerCategories = guild.Channels.Values.ToList().FindAll(_ => _.IsCategory && _.Name.StartsWith("reader-"));
+
+                    foreach (DiscordMember reader in readers)
+                    {
+                        if (!readerCategories.Exists(_ => _.Name == $"reader-{reader.Id}"))
+                        {
+                            readerCategories.Add(await guild.CreateChannelCategoryAsync(
+                                $"reader-{reader.Id}",
+                                new List<DiscordOverwriteBuilder>() {
+                                    new DiscordOverwriteBuilder()
+                                    .For(guild.EveryoneRole)
+                                    .Deny(Permissions.AccessChannels),
+                                    new DiscordOverwriteBuilder()
+                                    .For(reader)
+                                    .Deny(Permissions.SendMessages)
+                                    .Allow(Permissions.AccessChannels)
+                                    .Allow(Permissions.ReadMessageHistory)
+                                }));
+                        }
+                    }
+
+                    foreach (DiscordChannel category in readerCategories)
+                    {
+                        ulong id = ulong.Parse(category.Name.Substring(category.Name.IndexOf('-') + 1));
+                        if (!readers.Exists(_ => _.Id == id))
+                        {
+                            if (category.Children.Count > 0)
+                            {
+                                readerCategories.Remove(category);
+                                await category.ModifyAsync(_ => _.Name = "rearranging-channels");
+                                List<DiscordChannel> channels = category.Children.ToList();
+
+                                while (channels.Count > 0)
+                                {
+                                    DiscordChannel tempCategory = readerCategories.First();
+                                    foreach (DiscordChannel temp in readerCategories)
+                                    {
+                                        if (temp.Children.Count < tempCategory.Children.Count) { tempCategory = temp; }
+                                    }
+                                    await channels.First().ModifyAsync(_ => _.Parent = tempCategory);
+                                    channels.Remove(channels.First());
+                                }
+                            }
+                            await category.DeleteAsync();
+                        }
+                    }
                 }
             });
             return Task.CompletedTask;

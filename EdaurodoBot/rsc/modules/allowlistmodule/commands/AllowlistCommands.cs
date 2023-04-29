@@ -20,13 +20,6 @@ namespace EdaurodoBot.rsc.modules.allowlistmodule.commands
                 var command = new UpdateMainMessage(ctx, Module);
                 await command.ExecuteAsync();
             }
-
-            [SlashCommand("Readers", $"Atualiza os canais dos leitores da Allowlist")]
-            public async Task UpdateReaders(InteractionContext ctx)
-            {
-                var command = new UpdateReadersChannels(ctx, Module);
-                await command.ExecuteAsync();
-            }
         }
     }
 }
