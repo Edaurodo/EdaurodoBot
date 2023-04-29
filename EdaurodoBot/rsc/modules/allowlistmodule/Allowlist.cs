@@ -18,10 +18,11 @@ namespace EdaurodoBot.rsc.modules.allowlistmodule
         }
         public static async Task ExecuteAsync(AllowlistData data, AllowlistConfig config, DiscordGuild guild)
         {
-            var allowlist = new Allowlist(guild.GetMemberAsync(data.DiscordUser.Id).GetAwaiter().GetResult(), guild);
+            var allowlist = new Allowlist(guild.Members[data.DiscordUser.Id], guild);
 
             if (data.StartAllowlistTime == null || data.FinishAllowlistTime == null || data.FinishAllowlistTime.Value.Subtract(DateTime.Now.ToUniversalTime()).TotalMinutes < config.ReprovedWaitTime * -1)
             {
+
                 if (data.StartAllowlistTime == null)
                 {
                     await data.IncrementCurrentQuestion();
@@ -34,11 +35,14 @@ namespace EdaurodoBot.rsc.modules.allowlistmodule
                     await data.IncrementCurrentQuestion();
                     await allowlist.CreateAllowlistChannel(data, config, allowlist);
                 }
-                if (data.CurrentQuestion < config.Questions.Length) { await allowlist.UpdateMessageQuiz(data, config); }
-                else
+                if (data.Interaction.ChannelId == data.AllowlistUserChannel.Id)
                 {
-                    if (await allowlist.QuizApproved(data, config)) { if (data.CurrentForm != Form.None) { await allowlist.SendFormToUser(data.Interaction, config, data.CurrentForm); } else { await allowlist.FinalizeAllowlist(data, config, allowlist, true); } }
-                    else { await allowlist.FinalizeAllowlist(data, config, allowlist, false); }
+                    if (data.CurrentQuestion < config.Questions.Length) { await allowlist.UpdateMessageQuiz(data, config); }
+                    else
+                    {
+                        if (await allowlist.QuizApproved(data, config)) { if (data.CurrentForm != Form.None) { await allowlist.SendFormToUser(data.Interaction, config, data.CurrentForm); } else { await allowlist.FinalizeAllowlist(data, config, allowlist, true); } }
+                        else { await allowlist.FinalizeAllowlist(data, config, allowlist, false); }
+                    }
                 }
             }
             else
@@ -74,12 +78,12 @@ namespace EdaurodoBot.rsc.modules.allowlistmodule
         }
         public static async Task AllowlistApproved(AllowlistData data, AllowlistConfig config, DiscordGuild guild)
         {
-            var allowlist = new Allowlist(guild.GetMemberAsync(data.DiscordUser.Id).GetAwaiter().GetResult(), guild);
+            var allowlist = new Allowlist(guild.Members[data.DiscordUser.Id], guild);
             if (await allowlist.TryModifyApprovedAllowlistUserAsync(data, config, allowlist))
             {
                 await data.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder().AddEmbeds(await allowlist.GetEmbedsWithUserInformations(data)));
 
-                await guild.GetChannel((ulong)config.Channels.ApprovedId)
+                await guild.Channels[(ulong)config.Channels.ApprovedId]
                     .SendMessageAsync($"> * <@{data.DiscordUser.Id}> Sua Allowlist foi aprovada: Fique atento ao canal <#{config.Channels.InterviewId}> para participar no melhor horário para você!");
 
                 await data.Interaction.Channel.SendMessageAsync(
@@ -113,7 +117,7 @@ namespace EdaurodoBot.rsc.modules.allowlistmodule
         }
         public static async Task AllowlistReproved(AllowlistData data, AllowlistConfig config, DiscordGuild guild, string reason)
         {
-            var allowlist = new Allowlist(guild.GetMemberAsync(data.DiscordUser.Id).GetAwaiter().GetResult(), guild);
+            var allowlist = new Allowlist(guild.Members[data.DiscordUser.Id], guild);
 
             if (await allowlist.TryModifyReprovedAllowlistUserAsync(data, config, allowlist))
             {
@@ -130,7 +134,7 @@ namespace EdaurodoBot.rsc.modules.allowlistmodule
                         $"**Este canal será excluido em 30 segundos**")
                     .Build());
 
-                await allowlist.Guild.GetChannel((ulong)config.Channels.ReprovedId)
+                await allowlist.Guild.Channels[(ulong)config.Channels.ReprovedId]
                     .SendMessageAsync(new DiscordMessageBuilder()
                     .WithContent($"> * <@{data.DiscordUser.Id}> Sua Allowlist foi reprovada pelos seguintes motivos:")
                     .WithEmbed(new DiscordEmbedBuilder()
@@ -167,7 +171,7 @@ namespace EdaurodoBot.rsc.modules.allowlistmodule
         {
             if (approved)
             {
-                await SendFormToReader(data, allowlist.Member);
+                await SendFormToReader(data);
                 await data.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder()
                     .AddEmbed(new DiscordEmbedBuilder()
                     .WithColor(new DiscordColor("#2B2D31"))
@@ -181,7 +185,7 @@ namespace EdaurodoBot.rsc.modules.allowlistmodule
                     .Build()));
 
                 await data.SubmitFinishAllowlistTime();
-                await SetRoleSentAllowlist(data, config, allowlist);
+                await SetRoleSentAllowlist(config, allowlist);
 
                 _ = Task.Run(async () =>
                 {
@@ -219,18 +223,19 @@ namespace EdaurodoBot.rsc.modules.allowlistmodule
         {
             await interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder().AddEmbed(await GetEmbedToStartForm(config)).AddComponents(await GetButtonForm(form)));
         }
-        private async Task SendFormToReader(AllowlistData data, DiscordMember member)
+        private async Task SendFormToReader(AllowlistData data)
         {
-            var readerCategories = member.Guild.GetChannelsAsync().GetAwaiter().GetResult().ToList().FindAll(_ => _.IsCategory == true && _.Name.StartsWith("reader-"));
+            var readerCategories = data.AllowlistUserChannel.Guild.Channels.ToList().FindAll(_ => _.Value.IsCategory && _.Value.Name.StartsWith("reader-"));
             var category = readerCategories.First();
+
             foreach (var tempReaderCategory in readerCategories)
             {
-                if (tempReaderCategory.Children.Count < category.Children.Count) { category = tempReaderCategory; }
+                if (tempReaderCategory.Value.Children.Count < category.Value.Children.Count) { category = tempReaderCategory; }
             }
-            await member.Guild.CreateChannelAsync(
-                name: $"allowlist-{member.Id}",
+            await data.AllowlistUserChannel.Guild.CreateChannelAsync(
+                name: $"allowlist-{data.DiscordUser.Id}",
                 type: ChannelType.Text,
-                parent: category).GetAwaiter().GetResult()
+                parent: category.Value).GetAwaiter().GetResult()
                 .SendMessageAsync(new DiscordMessageBuilder()
                 .AddEmbeds(await GetEmbedsWithUserInformations(data))
                 .AddComponents(new List<DiscordComponent>(){
@@ -283,19 +288,31 @@ namespace EdaurodoBot.rsc.modules.allowlistmodule
             }
             return true;
         }
-        private async Task SetRoleSentAllowlist(AllowlistData data, AllowlistConfig config, Allowlist allowlist)
+        private async Task SetRoleSentAllowlist(AllowlistConfig config, Allowlist allowlist)
         {
-            List<DiscordRole> roles = allowlist.Member.Roles.ToList();
-            roles.Add(allowlist.Guild.GetRole((ulong)config.Roles.AllowlistSentId));
-            await allowlist.Member.ModifyAsync(_ => { _.Roles = roles; });
+            if (!allowlist.Member.Roles.Contains(allowlist.Guild.Roles[(ulong)config.Roles.AllowlistSentId]))
+            {
+                await allowlist.Member.ModifyAsync(_ =>
+                {
+                    List<DiscordRole> roles = allowlist.Member.Roles.ToList().FindAll(_ => _.Id != (ulong)config.Roles.AllowlistSentId);
+                    roles.Add(allowlist.Guild.Roles[(ulong)config.Roles.AllowlistSentId]);
+                    _.Roles = roles;
+                });
+            }
         }
         private async Task<bool> TryModifyApprovedAllowlistUserAsync(AllowlistData data, AllowlistConfig config, Allowlist allowlist)
         {
             if (allowlist.Guild.Members.ContainsKey(data.DiscordUser.Id))
             {
-                List<DiscordRole> roles = allowlist.Member.Roles.ToList().FindAll(_ => _.Id != (ulong)config.Roles.AllowlistSentId);
-                roles.Add(allowlist.Guild.Roles[(ulong)config.Roles.WaitingInterviewId]);
-                await allowlist.Member.ModifyAsync(_ => _.Roles = roles);
+                if (!allowlist.Member.Roles.Contains(allowlist.Guild.Roles[(ulong)config.Roles.WaitingInterviewId]))
+                {
+                    await allowlist.Member.ModifyAsync(_ =>
+                    {
+                        List<DiscordRole> roles = allowlist.Member.Roles.ToList().FindAll(_ => _.Id != (ulong)config.Roles.AllowlistSentId);
+                        roles.Add(allowlist.Guild.Roles[(ulong)config.Roles.WaitingInterviewId]);
+                        _.Roles = roles;
+                    });
+                }
                 return true;
             }
             return false;

@@ -29,7 +29,6 @@ namespace EdaurodoBot.rsc.modules.allowlistmodule.services
         {
             Bot = bot;
             Bot.Client.Ready += Edaurodo_Ready;
-            Bot.Client.GuildDownloadCompleted += Edaurodo_GuildDownloadCompleted;
             Data = new List<AllowlistData>();
             DataInternalLock = new SemaphoreSlim(1, 1);
         }
@@ -39,7 +38,7 @@ namespace EdaurodoBot.rsc.modules.allowlistmodule.services
             try
             {
                 Internaldata = Data;
-                DataSerialized = JsonConvert.SerializeObject(Data, Formatting.Indented);
+                DataSerialized = JsonConvert.SerializeObject(Internaldata, Formatting.Indented);
                 FileInfo file = new FileInfo(Path.Combine(new[] { AllowlistUtilities.PathData, "allowlist.db.json" }));
                 file.Delete();
                 using (StreamWriter sw = file.CreateText())
@@ -63,7 +62,7 @@ namespace EdaurodoBot.rsc.modules.allowlistmodule.services
                 switch (s.Id)
                 {
                     case "btn_AlStart":
-                        if (!Data.Exists(_ => _.DiscordUser.Id == s.Interaction.User.Id))
+                        if (!Data.Exists(_ => _.DiscordUser.Id == s.User.Id))
                         {
                             Data.Add(new AllowlistData(s.Interaction.User));
                             await Data.Find(_ => _.DiscordUser.Id == s.Interaction.User.Id).UpdateInteraction(s.Interaction);
@@ -165,6 +164,8 @@ namespace EdaurodoBot.rsc.modules.allowlistmodule.services
             {
                 if (Config.Use)
                 {
+                    Bot.Client.GuildDownloadCompleted += Edaurodo_GuildDownloadCompleted;
+                    Bot.Client.MessageCreated += Edaurodo_MessageCreate;
                     Bot.SlashCommands.RegisterCommands<AllowlistCommands>(Bot.Config.InternalConfig.GuildId);
                     Bot.SlashCommands.RefreshCommands();
                     Bot.Client.ComponentInteractionCreated += Component_Interaction_Created;
@@ -181,21 +182,36 @@ namespace EdaurodoBot.rsc.modules.allowlistmodule.services
                 throw new Exception();
             }
         }
-        private Task Edaurodo_GuildDownloadCompleted(DiscordClient sender, GuildDownloadCompletedEventArgs args)
+        private async Task Edaurodo_GuildDownloadCompleted(DiscordClient sender, GuildDownloadCompletedEventArgs args)
         {
-            args.Guilds[Bot.Config.InternalConfig.GuildId].Channels[(ulong)Config.Channels.CategoryId].Children
+            var list = args.Guilds[Bot.Config.InternalConfig.GuildId].Channels[(ulong)Config.Channels.CategoryId].Children
                 .ToList()
-                .FindAll(_ => _.Type == ChannelType.Text && _.Id != Config.Channels.MainId && _.Id != Config.Channels.ApprovedId && _.Id != Config.Channels.ReprovedId && _.Id != Config.Channels.InterviewId)
-                .ForEach(_ =>
+                .FindAll(_ => _.Type == ChannelType.Text && _.Id != (ulong)Config.Channels.MainId && _.Id != (ulong)Config.Channels.ApprovedId && _.Id != (ulong)Config.Channels.ReprovedId && _.Id != (ulong)Config.Channels.InterviewId && _.Id != (ulong)Config.Channels.ChangeNameId);
+            
+            if(list.Count > 0)
+            {
+                foreach(var item in list) {
+                    await item.DeleteAsync();
+                }
+            }
+        }
+        private Task Edaurodo_MessageCreate(DiscordClient sender, MessageCreateEventArgs args)
+        {
+            _ = Task.Run(async () =>
+            {
+                if (args.Channel.Id == Config.Channels.ChangeNameId)
                 {
-                    if (_ != null)
+                    await args.Guild.Members[args.Author.Id].ModifyAsync(_ =>
                     {
-                        _.Guild.Channels[(ulong)Config.Channels.MainId]
-                        .DeleteOverwriteAsync(_.Guild.Members[ulong.Parse(_.Name.Substring(_.Name.IndexOf('-') + 1))]);
-                        _.DeleteAsync();
-                    }
-                });
+                        _.Nickname = args.Message.Content;
+                        var roles = args.Guild.Members[args.Author.Id].Roles.ToList().FindAll(_ => _.Id != Config.Roles.ApprovedId);
+                        roles.Add(args.Guild.Roles[(ulong)Config.Roles.ResidentId]);
+                        _.Roles = roles;
+                    });
 
+                    await args.Message.CreateReactionAsync(DiscordEmoji.FromName(Bot.Client, ":white_check_mark:"));
+                }
+            });
             return Task.CompletedTask;
         }
     }

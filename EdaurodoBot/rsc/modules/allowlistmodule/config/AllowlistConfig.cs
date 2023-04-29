@@ -8,27 +8,28 @@ namespace EdaurodoBot.rsc.modules.allowlistmodule.config
         [JsonProperty("use_module")]
         public bool Use { get; private set; }
 
+        [JsonProperty("use_changename_module")]
+        public bool UseChangeName { get; private set; }
+
         [JsonProperty("reproved_wait_time_from_minutes")]
         public int? ReprovedWaitTime { get; private set; }
 
         [JsonProperty("roles")]
         public AllowlistRoles Roles { get; private set; }
 
-
         [JsonProperty("channels")]
         public AllowlistChannels Channels { get; private set; }
-
 
         [JsonProperty("questions")]
         public AllowlistQuestion[]? Questions { get; private set; }
 
-
         [JsonProperty("messages")]
         public AllowlistMessages Messages { get; private set; }
 
-        public AllowlistConfig(bool? use, int? reprovedwaittime, AllowlistRoles roles, AllowlistChannels channels, AllowlistQuestion[]? questions, AllowlistMessages messages)
+        public AllowlistConfig(bool? use, bool? changename, int? reprovedwaittime, AllowlistRoles roles, AllowlistChannels channels, AllowlistQuestion[]? questions, AllowlistMessages messages)
         {
             Use = use ?? false;
+            UseChangeName = changename ?? false;
             ReprovedWaitTime = reprovedwaittime ?? 60;
             Roles = roles;
             Channels = channels;
@@ -41,6 +42,9 @@ namespace EdaurodoBot.rsc.modules.allowlistmodule.config
         [JsonProperty("reader_id")]
         public ulong? ReaderId { get; private set; }
 
+        [JsonProperty("resident_id")]
+        public ulong? ResidentId { get; private set; }        
+        
         [JsonProperty("approved_id")]
         public ulong? ApprovedId { get; private set; }
 
@@ -53,7 +57,7 @@ namespace EdaurodoBot.rsc.modules.allowlistmodule.config
         [JsonProperty("waiting_interview_id")]
         public ulong? WaitingInterviewId { get; private set; }
 
-        public AllowlistRoles() { ReaderId = null; ApprovedId = null; ReprovedId = null; AllowlistSentId = null; WaitingInterviewId = null; }
+        public AllowlistRoles() { ReaderId = null; ReaderId = null; ApprovedId = null; ReprovedId = null; AllowlistSentId = null; WaitingInterviewId = null; }
     }
     public sealed class AllowlistChannels
     {
@@ -72,7 +76,10 @@ namespace EdaurodoBot.rsc.modules.allowlistmodule.config
         [JsonProperty("interview_notice_id")]
         public ulong? InterviewId { get; private set; }
 
-        public AllowlistChannels() { CategoryId = null; MainId = null; ApprovedId = null; ReprovedId = null; InterviewId = null; }
+        [JsonProperty("changename_id")]
+        public ulong? ChangeNameId { get; private set; }
+
+        public AllowlistChannels() { CategoryId = null; MainId = null; ApprovedId = null; ReprovedId = null; InterviewId = null; ChangeNameId = null; }
     }
     public struct AllowlistQuestion
     {

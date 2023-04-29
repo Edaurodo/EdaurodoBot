@@ -29,6 +29,7 @@ namespace EdaurodoBot.rsc.core.data
 
         public DevConfig()
         {
+            //this.GuildId = 1091496219706134528; //Kansas
             this.GuildId = 1097821267085758504; //Dummy World - Test Server
         }
     }

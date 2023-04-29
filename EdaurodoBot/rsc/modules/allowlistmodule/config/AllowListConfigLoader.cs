@@ -48,7 +48,8 @@ namespace EdaurodoBot.rsc.modules.allowlistmodule.config
             Client.Logger.LogError(new EventId(777, "ConfigLoader"), "Arquivo não existe: 'allowlist.cfg.json' criado novo arquivo de configuração, configure o modulo e reinicie a aplicação");
 
             AllowlistConfig config = new AllowlistConfig(
-                use: true,
+                use: false,
+                changename: false,
                 reprovedwaittime: 60,
                 roles: new AllowlistRoles(),
                 channels: new AllowlistChannels(),
@@ -159,6 +160,7 @@ namespace EdaurodoBot.rsc.modules.allowlistmodule.config
                                 {
                                     AllowlistConfig value = new AllowlistConfig(
                                         use: config.Use,
+                                        changename: config.UseChangeName,
                                         reprovedwaittime: config.ReprovedWaitTime,
                                         roles: config.Roles,
                                         channels: config.Channels,

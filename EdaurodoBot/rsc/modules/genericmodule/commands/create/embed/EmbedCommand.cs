@@ -633,33 +633,33 @@ namespace EdaurodoBot.rsc.modules.genericmodule.commands.create.embed
 
             #region UpLine of buttons
             List<DiscordComponent> btn_upline = new List<DiscordComponent>();
-            DiscordComponentEmoji emoji_color = new DiscordComponentEmoji(DiscordEmoji.FromGuildEmote(Client, 1092885645610991727));
+            DiscordComponentEmoji emoji_color = new DiscordComponentEmoji(DiscordEmoji.FromName(Client, ":art:"));
             btn_upline.Add(new DiscordButtonComponent(ButtonStyle.Secondary, $"{Context.Interaction.Id}-btn_color", "Cor", false, emoji_color));
-            DiscordComponentEmoji emoji_author = new DiscordComponentEmoji(DiscordEmoji.FromGuildEmote(Client, 1092843214421118998));
+            DiscordComponentEmoji emoji_author = new DiscordComponentEmoji(DiscordEmoji.FromName(Client, ":astronaut:"));
             btn_upline.Add(new DiscordButtonComponent(ButtonStyle.Secondary, $"{Context.Interaction.Id}-btn_author", "Autor", false, emoji_author));
-            DiscordComponentEmoji emoji_addimage = new DiscordComponentEmoji(DiscordEmoji.FromGuildEmote(Client, 1092882979107393586));
+            DiscordComponentEmoji emoji_addimage = new DiscordComponentEmoji(DiscordEmoji.FromName(Client, ":frame_photo:"));
             btn_upline.Add(new DiscordButtonComponent(ButtonStyle.Secondary, $"{Context.Interaction.Id}-btn_addimage", "Imagem e Thumbnail", false, emoji_addimage));
             btn_panel.Add(new DiscordActionRowComponent(btn_upline));
             #endregion
 
             #region MidLine of buttons
             List<DiscordComponent> btn_midline = new List<DiscordComponent>();
-            DiscordComponentEmoji emoji_title = new DiscordComponentEmoji(DiscordEmoji.FromGuildEmote(Client, 1092908115307008040));
+            DiscordComponentEmoji emoji_title = new DiscordComponentEmoji(DiscordEmoji.FromName(Client, ":page_facing_up:"));
             btn_midline.Add(new DiscordButtonComponent(ButtonStyle.Secondary, $"{Context.Interaction.Id}-btn_title", "Título", false, emoji_title));
-            DiscordComponentEmoji emoji_description = new DiscordComponentEmoji(DiscordEmoji.FromGuildEmote(Client, 1092908964603232346));
+            DiscordComponentEmoji emoji_description = new DiscordComponentEmoji(DiscordEmoji.FromName(Client, ":pencil:"));
             btn_midline.Add(new DiscordButtonComponent(ButtonStyle.Secondary, $"{Context.Interaction.Id}-btn_description", "Descrição", false, emoji_description));
-            DiscordComponentEmoji emoji_field = new DiscordComponentEmoji(DiscordEmoji.FromGuildEmote(Client, 1094408125068627999));
+            DiscordComponentEmoji emoji_field = new DiscordComponentEmoji(DiscordEmoji.FromName(Client, ":pen_fountain:"));
             btn_midline.Add(new DiscordButtonComponent(ButtonStyle.Secondary, $"{Context.Interaction.Id}-btn_field", "Fields", false, emoji_field));
-            DiscordComponentEmoji emoji_footer = new DiscordComponentEmoji(DiscordEmoji.FromGuildEmote(Client, 1092896236467671071));
+            DiscordComponentEmoji emoji_footer = new DiscordComponentEmoji(DiscordEmoji.FromName(Client, ":triangular_flag_on_post:"));
             btn_midline.Add(new DiscordButtonComponent(ButtonStyle.Secondary, $"{Context.Interaction.Id}-btn_footer", "Footer", false, emoji_footer));
             btn_panel.Add(new DiscordActionRowComponent(btn_midline));
             #endregion
 
             #region DownLine of buttons
             List<DiscordComponent> btn_downline = new List<DiscordComponent>();
-            DiscordComponentEmoji emoji_download = new DiscordComponentEmoji(DiscordEmoji.FromGuildEmote(Client, 1092759717346037780));
-            DiscordComponentEmoji emoji_upload = new DiscordComponentEmoji(DiscordEmoji.FromGuildEmote(Client, 1092759719711604746));
-            DiscordComponentEmoji emoji_send = new DiscordComponentEmoji(DiscordEmoji.FromGuildEmote(Client, 1092762901493841980));
+            DiscordComponentEmoji emoji_download = new DiscordComponentEmoji(DiscordEmoji.FromName(Client, ":arrow_down:"));
+            DiscordComponentEmoji emoji_upload = new DiscordComponentEmoji(DiscordEmoji.FromName(Client, ":arrow_up:"));
+            DiscordComponentEmoji emoji_send = new DiscordComponentEmoji(DiscordEmoji.FromName(Client, ":incoming_envelope:"));
             btn_downline.Add(new DiscordButtonComponent(ButtonStyle.Primary, $"{Context.Interaction.Id}-btn_jsonup", "Importar JSON", false, emoji_upload));
             btn_downline.Add(new DiscordButtonComponent(ButtonStyle.Primary, $"{Context.Interaction.Id}-btn_jsondown", "Exportar JSON", false, emoji_download));
             btn_downline.Add(new DiscordButtonComponent(ButtonStyle.Success, $"{Context.Interaction.Id}-btn_sendembed", "Enviar aqui", false, emoji_send));
@@ -672,7 +672,7 @@ namespace EdaurodoBot.rsc.modules.genericmodule.commands.create.embed
         {
             List<DiscordSelectComponentOption> selectOptions = new List<DiscordSelectComponentOption>();
             selectOptions.Clear();
-            DiscordComponentEmoji emoji_add = new DiscordComponentEmoji(DiscordEmoji.FromGuildEmote(Client, 1094353730578694175));
+            DiscordComponentEmoji emoji_add = new DiscordComponentEmoji(DiscordEmoji.FromName(Client, ":heavy_plus_sign:"));
             selectOptions.Add(new DiscordSelectComponentOption("Adicione um código HEX", "select_colorhex", null, false, emoji_add));
             foreach (var color in _colorsCollection)
             {
@@ -683,7 +683,7 @@ namespace EdaurodoBot.rsc.modules.genericmodule.commands.create.embed
                 new DiscordSelectComponent($"{Context.Interaction.Id}-select_colors", "Escolha uma cor para seu Embed", selectOptions, false, 1, 1)
             };
 
-            DiscordComponentEmoji emoji_goback = new DiscordComponentEmoji(DiscordEmoji.FromGuildEmote(Client, 1092867423935418398));
+            DiscordComponentEmoji emoji_goback = new DiscordComponentEmoji(DiscordEmoji.FromName(Client, ":back:"));
             List<DiscordComponent> button_line = new List<DiscordComponent>() {
             new DiscordButtonComponent(ButtonStyle.Secondary, $"{Context.Interaction.Id}-btn_goback", null, false, emoji_goback),
             new DiscordLinkButtonComponent("https://htmlcolorcodes.com/", "Encontre novas cores", false, null)
@@ -702,8 +702,8 @@ namespace EdaurodoBot.rsc.modules.genericmodule.commands.create.embed
 
             if (_fieldList.Count > 0)
             {
-                DiscordComponentEmoji emoji_edit = new DiscordComponentEmoji(DiscordEmoji.FromGuildEmote(Client, 1094408125068627999));
-                DiscordComponentEmoji emoji_delete = new DiscordComponentEmoji(DiscordEmoji.FromGuildEmote(Client, 1094409217533812788));
+                DiscordComponentEmoji emoji_edit = new DiscordComponentEmoji(DiscordEmoji.FromName(Client, ":pen_fountain:"));
+                DiscordComponentEmoji emoji_delete = new DiscordComponentEmoji(DiscordEmoji.FromName(Client, ":recycle:"));
                 List<DiscordComponent> button_upline = new List<DiscordComponent>() {
 
                     new DiscordButtonComponent(ButtonStyle.Secondary, $"{Context.Interaction.Id}-btn_editfield", "Editar", FieldSelect == null, emoji_edit),
@@ -738,8 +738,8 @@ namespace EdaurodoBot.rsc.modules.genericmodule.commands.create.embed
                 components_lines.Add(new DiscordActionRowComponent(select_line));
             }
 
-            DiscordComponentEmoji emoji_goback = new DiscordComponentEmoji(DiscordEmoji.FromGuildEmote(Client, 1092867423935418398));
-            DiscordComponentEmoji emoji_add = new DiscordComponentEmoji(DiscordEmoji.FromGuildEmote(Client, 1094353730578694175));
+            DiscordComponentEmoji emoji_goback = new DiscordComponentEmoji(DiscordEmoji.FromName(Client, ":back:"));
+            DiscordComponentEmoji emoji_add = new DiscordComponentEmoji(DiscordEmoji.FromName(Client, ":heavy_plus_sign:"));
             List<DiscordComponent> button_downline = new List<DiscordComponent>() {
                 new DiscordButtonComponent(ButtonStyle.Secondary, $"{Context.Interaction.Id}-btn_goback", null, false, emoji_goback),
                 new DiscordButtonComponent(ButtonStyle.Success, $"{Context.Interaction.Id}-btn_addfield", "Novo field", !(_fieldList.Count < 25), emoji_add)
