@@ -17,17 +17,14 @@ namespace EdaurodoBot.rsc.modules.allowlistmodule.services
         private SemaphoreSlim DataInternalLock;
         private List<AllowlistData>? Internaldata;
         private string? DataSerialized;
-
         public List<AllowlistData> Data { get; private set; }
-
         public EdaurodoMain Bot { get; }
         public AllowlistConfig? Config { get; private set; }
-        public AllowListConfigLoader? ConfigLoader { get; private set; }
 
         public AllowlistService(EdaurodoMain bot)
         {
             Bot = bot;
-            Bot.Client.Ready += Edaurodo_Ready;
+            Bot.Client.Ready += Allowlist_Ready;
             Data = new List<AllowlistData>();
             DataInternalLock = new SemaphoreSlim(1, 1);
         }
@@ -54,99 +51,109 @@ namespace EdaurodoBot.rsc.modules.allowlistmodule.services
                 DataInternalLock.Release();
             }
         }
-        private Task Component_Interaction_Created(DiscordClient c, ComponentInteractionCreateEventArgs s)
+        private Task Allowlist_ComponentInteractionCreated(DiscordClient c, ComponentInteractionCreateEventArgs s)
         {
             _ = Task.Run(async () =>
             {
+                ulong userId = s.User.Id;
                 switch (s.Id)
                 {
                     case "btn_AlStart":
-                        if (!Data.Exists(_ => _.DiscordUser.Id == s.User.Id))
+                        if (!Data.Exists(_ => _.DiscordUser.Id == userId))
                         {
-                            Data.Add(new AllowlistData(s.Interaction.User));
-                            await Data.Find(_ => _.DiscordUser.Id == s.Interaction.User.Id).UpdateInteraction(s.Interaction);
-                            await Allowlist.ExecuteAsync(Data.Find(_ => _.DiscordUser.Id == s.Interaction.User.Id), Config, s.Guild);
+                            Data.Add(new AllowlistData(s.User));
+                            await Data.Find(_ => _.DiscordUser.Id == userId).UpdateInteraction(s.Interaction);
+                            await Allowlist.ExecuteAsync(Data.Find(_ => _.DiscordUser.Id == userId), Config, s.Guild);
                         }
                         else
                         {
-                            await Data.Find(_ => _.DiscordUser.Id == s.Interaction.User.Id).UpdateInteraction(s.Interaction);
-                            await Allowlist.ExecuteAsync(Data.Find(_ => _.DiscordUser.Id == s.Interaction.User.Id), Config, s.Guild);
+                            await Data.Find(_ => _.DiscordUser.Id == userId).UpdateInteraction(s.Interaction);
+                            await Allowlist.ExecuteAsync(Data.Find(_ => _.DiscordUser.Id == userId), Config, s.Guild);
+                        }
+                        break;
+                    case "select_AlAlternativesResponse":
+                        if (Data.Exists(_ => _.DiscordUser.Id == userId))
+                        {
+                            await Data.Find(_ => _.DiscordUser.Id == userId).UpdateInteraction(s.Interaction);
+                            await Data.Find(_ => _.DiscordUser.Id == userId).SubmitResponse(int.Parse(s.Values[0]));
+                            await Data.Find(_ => _.DiscordUser.Id == userId).IncrementCurrentQuestion();
+                            await Allowlist.ExecuteAsync(Data.Find(_ => _.DiscordUser.Id == userId), Config, s.Guild);
+                        }
+                        break;
+                    case "btn_openRealInfoModal":
+                        if (Data.Exists(_ => _.DiscordUser.Id == userId))
+                        {
+                            await Data.Find(_ => _.DiscordUser.Id == userId).UpdateInteraction(s.Interaction);
+                            await Allowlist.OpenRealInfoModal(Data.Find(_ => _.DiscordUser.Id == userId));
+                        }
+                        break;
+                    case "btn_openCharInfoModal":
+                        if (Data.Exists(_ => _.DiscordUser.Id == userId))
+                        {
+                            await Data.Find(_ => _.DiscordUser.Id == userId).UpdateInteraction(s.Interaction);
+                            await Allowlist.OpenCharInfoModal(Data.Find(_ => _.DiscordUser.Id == userId));
                         }
                         break;
                     case "btn_AlApproved":
-                        if (ulong.TryParse(s.Channel.Name.Substring(s.Channel.Name.IndexOf('-') + 1), out var id))
+                        if (ulong.TryParse(s.Channel.Name.Substring(s.Channel.Name.IndexOf('-') + 1), out var _id))
                         {
-                            await Data.Find(_ => _.DiscordUser.Id == id).UpdateInteraction(s.Interaction);
-                            await Allowlist.AllowlistApproved(Data.Find(_ => _.DiscordUser.Id == id), Config, s.Guild);
-                            Data.Remove(Data.Find(_ => _.DiscordUser.Id == id));
+                            await Data.Find(_ => _.DiscordUser.Id == _id).UpdateInteraction(s.Interaction);
+                            await Allowlist.AllowlistApproved(Data.Find(_ => _.DiscordUser.Id == _id), Config, s.Guild);
+                            Data.Remove(Data.Find(_ => _.DiscordUser.Id == _id));
                             await SaveData();
                         }
                         break;
                     case "btn_AlReproved":
-                        if (ulong.TryParse(s.Channel.Name.Substring(s.Channel.Name.IndexOf('-') + 1), out var id2))
+                        if (ulong.TryParse(s.Channel.Name.Substring(s.Channel.Name.IndexOf('-') + 1), out var __id))
                         {
-                            await Data.Find(_ => _.DiscordUser.Id == id2).UpdateInteraction(s.Interaction);
-                            await Allowlist.AllowlistReprovedModal(Data.Find(_ => _.DiscordUser.Id == id2));
-                        }
-                        break;
-                    case "btn_openRealInfoModal":
-                        await Data.Find(_ => _.DiscordUser.Id == s.Interaction.User.Id).UpdateInteraction(s.Interaction);
-                        await Allowlist.OpenRealInfoModal(Data.Find(_ => _.DiscordUser.Id == s.Interaction.User.Id));
-                        break;
-                    case "btn_openCharInfoModal":
-                        await Data.Find(_ => _.DiscordUser.Id == s.Interaction.User.Id).UpdateInteraction(s.Interaction);
-                        await Allowlist.OpenCharInfoModal(Data.Find(_ => _.DiscordUser.Id == s.Interaction.User.Id));
-                        break;
-                    case "select_AlAlternativesResponse":
-                        if (Data.Exists(_ => _.DiscordUser.Id == s.Interaction.User.Id))
-                        {
-                            await Data.Find(_ => _.DiscordUser.Id == s.Interaction.User.Id).UpdateInteraction(s.Interaction);
-                            await Data.Find(_ => _.DiscordUser.Id == s.Interaction.User.Id).SubmitResponse(int.Parse(s.Values[0]));
-                            await Data.Find(_ => _.DiscordUser.Id == s.Interaction.User.Id).IncrementCurrentQuestion();
-                            await Allowlist.ExecuteAsync(Data.Find(_ => _.DiscordUser.Id == s.Interaction.User.Id), Config, s.Guild);
+                            await Data.Find(_ => _.DiscordUser.Id == __id).UpdateInteraction(s.Interaction);
+                            await Allowlist.AllowlistReprovedModal(Data.Find(_ => _.DiscordUser.Id == __id));
                         }
                         break;
                 }
             });
             return Task.CompletedTask;
         }
-        private Task Modal_Submitted(DiscordClient c, ModalSubmitEventArgs s)
+        private Task Allowlist_ModalSubmitted(DiscordClient c, ModalSubmitEventArgs s)
         {
             _ = Task.Run(async () =>
             {
+                ulong userId = s.Interaction.User.Id;
+                DiscordGuild guild = s.Interaction.Guild;
+                DiscordInteraction interaction = s.Interaction;
                 switch (s.Interaction.Data.CustomId)
                 {
                     case "modal_RealInfoModal":
-                        if (Data.Exists(_ => _.DiscordUser.Id == s.Interaction.User.Id))
+                        if (Data.Exists(_ => _.DiscordUser.Id == userId))
                         {
                             s.Values.TryGetValue("AlRealName", out string realname);
                             s.Values.TryGetValue("AlRealAge", out string realage);
                             s.Values.TryGetValue("AlExp", out string rpexp);
-                            await Data.Find(_ => _.DiscordUser.Id == s.Interaction.User.Id).UpdateCurrentForm(Form.Character);
-                            await Data.Find(_ => _.DiscordUser.Id == s.Interaction.User.Id).UpdateInteraction(s.Interaction);
-                            await Data.Find(_ => _.DiscordUser.Id == s.Interaction.User.Id).SubmitRealInfo(realname, realage, rpexp);
-                            await Allowlist.ExecuteAsync(Data.Find(_ => _.DiscordUser.Id == s.Interaction.User.Id), Config, s.Interaction.Guild);
+                            await Data.Find(_ => _.DiscordUser.Id == userId).SubmitRealInfo(realname, realage, rpexp);
+                            await Data.Find(_ => _.DiscordUser.Id == userId).UpdateInteraction(interaction);
+                            await Data.Find(_ => _.DiscordUser.Id == userId).UpdateCurrentForm(Form.Character);
+                            await Allowlist.ExecuteAsync(Data.Find(_ => _.DiscordUser.Id == userId), Config, guild);
                         }
                         break;
                     case "modal_CharInfoModal":
-                        if (Data.Exists(_ => _.DiscordUser.Id == s.Interaction.User.Id))
+                        if (Data.Exists(_ => _.DiscordUser.Id == userId))
                         {
                             s.Values.TryGetValue("AlCharName", out string charname);
                             s.Values.TryGetValue("AlCharAge", out string charage);
                             s.Values.TryGetValue("AlCharLore", out string charlore);
-                            await Data.Find(_ => _.DiscordUser.Id == s.Interaction.User.Id).UpdateCurrentForm(Form.None);
-                            await Data.Find(_ => _.DiscordUser.Id == s.Interaction.User.Id).UpdateInteraction(s.Interaction);
-                            await Data.Find(_ => _.DiscordUser.Id == s.Interaction.User.Id).SubmitCharInfo(charage, charname, charlore);
-                            await Allowlist.ExecuteAsync(Data.Find(_ => _.DiscordUser.Id == s.Interaction.User.Id), Config, s.Interaction.Guild);
+                            await Data.Find(_ => _.DiscordUser.Id == userId).SubmitCharInfo(charage, charname, charlore);
+                            await Data.Find(_ => _.DiscordUser.Id == userId).UpdateInteraction(interaction);
+                            await Data.Find(_ => _.DiscordUser.Id == userId).UpdateCurrentForm(Form.None);
+                            await Allowlist.ExecuteAsync(Data.Find(_ => _.DiscordUser.Id == userId), Config, guild);
                             await SaveData();
                         }
                         break;
                     case "modal_Reproved":
-                        if (ulong.TryParse(s.Interaction.Channel.Name.Substring(s.Interaction.Channel.Name.IndexOf('-') + 1), out var id))
+                        if (ulong.TryParse(interaction.Channel.Name.Substring(interaction.Channel.Name.IndexOf('-') + 1), out var _id))
                         {
-                            await Data.Find(_ => _.DiscordUser.Id == id).UpdateInteraction(s.Interaction);
+                            await Data.Find(_ => _.DiscordUser.Id == _id).UpdateInteraction(interaction);
                             s.Values.TryGetValue("AlReasons", out string reasons);
-                            await Allowlist.AllowlistReproved(Data.Find(_ => _.DiscordUser.Id == id), Config, s.Interaction.Guild, reasons);
+                            await Allowlist.AllowlistReproved(Data.Find(_ => _.DiscordUser.Id == _id), Config, guild, reasons);
                             await SaveData();
                         }
                         break;
@@ -154,39 +161,39 @@ namespace EdaurodoBot.rsc.modules.allowlistmodule.services
             });
             return Task.CompletedTask;
         }
-        private Task Edaurodo_Ready(DiscordClient sender, ReadyEventArgs args)
+        private Task Allowlist_Ready(DiscordClient sender, ReadyEventArgs args)
         {
             _ = Task.Run(async () =>
             {
-                ConfigLoader = new AllowListConfigLoader(Bot.Client);
-                Config = await ConfigLoader.LoadConfigAsync();
-                var data = await ConfigLoader.LoadDataAsync();
+                var loader = new AllowListConfigLoader(Bot.Client);
+                var data = await loader.LoadDataAsync();
+                Config = await loader.LoadConfigAsync();
                 if (Config != null && Config.Use)
                 {
-                    Bot.Client.GuildDownloadCompleted += Edaurodo_GuildDownloadCompleted;
+                    Bot.Client.GuildDownloadCompleted += Allowlist_GuildDownloadCompleted;
                     Bot.SlashCommands.RegisterCommands<AllowlistCommands>(Bot.Config.InternalConfig.GuildId);
                     Bot.SlashCommands.RefreshCommands();
                     Data = data;
-                    Bot.Client.Logger.LogInformation(new EventId(777, "AllowlistService"), "AllowlistModule inicializado: tudo OK;");
+                    Bot.Client.Logger.LogInformation(new EventId(777, "AllowlistService"), "AllowlistModule inicializado: OK!");
                 }
             });
             return Task.CompletedTask;
         }
-        private Task Edaurodo_GuildDownloadCompleted(DiscordClient sender, GuildDownloadCompletedEventArgs args)
+        private Task Allowlist_GuildDownloadCompleted(DiscordClient sender, GuildDownloadCompletedEventArgs args)
         {
-            Bot.Client.MessageCreated += Edaurodo_MessageCreate;
-            Bot.Client.GuildMemberUpdated += Edaurodo_GuildMemberUpdated;
-            Bot.Client.GuildMemberAdded += Edaurodo_GuildMemberAdded;
+            Bot.Client.MessageCreated += Allowlist_MessageCreate;
+            Bot.Client.GuildMemberUpdated += Allowlist_GuildMemberUpdated;
+            Bot.Client.GuildMemberAdded += Allowlist_GuildMemberAdded;
 
-            Bot.Client.ModalSubmitted += Modal_Submitted;
-            Bot.Client.ComponentInteractionCreated += Component_Interaction_Created;
+            Bot.Client.ModalSubmitted += Allowlist_ModalSubmitted;
+            Bot.Client.ComponentInteractionCreated += Allowlist_ComponentInteractionCreated;
 
             args.Guilds[Bot.Config.InternalConfig.GuildId].Channels[(ulong)Config.Channels.CategoryId].Children.ToList()
                 .FindAll(_ => _.Type == 0 && _.Id != (ulong)Config.Channels.MainId && _.Id != (ulong)Config.Channels.ApprovedId && _.Id != (ulong)Config.Channels.ReprovedId && _.Id != (ulong)Config.Channels.InterviewId && _.Id != (ulong)Config.Channels.ChangeNameId)
                 .ForEach(async _ => { await _.DeleteAsync(); });
             return Task.CompletedTask;
         }
-        private Task Edaurodo_MessageCreate(DiscordClient sender, MessageCreateEventArgs args)
+        private Task Allowlist_MessageCreate(DiscordClient sender, MessageCreateEventArgs args)
         {
             _ = Task.Run(async () =>
             {
@@ -204,7 +211,7 @@ namespace EdaurodoBot.rsc.modules.allowlistmodule.services
             });
             return Task.CompletedTask;
         }
-        private Task Edaurodo_GuildMemberAdded(DiscordClient sender, GuildMemberAddEventArgs args)
+        private Task Allowlist_GuildMemberAdded(DiscordClient sender, GuildMemberAddEventArgs args)
         {
             _ = Task.Run(async () =>
             {
@@ -217,7 +224,7 @@ namespace EdaurodoBot.rsc.modules.allowlistmodule.services
             });
             return Task.CompletedTask;
         }
-        private Task Edaurodo_GuildMemberUpdated(DiscordClient sender, GuildMemberUpdateEventArgs args)
+        private Task Allowlist_GuildMemberUpdated(DiscordClient sender, GuildMemberUpdateEventArgs args)
         {
             _ = Task.Run(async () =>
             {

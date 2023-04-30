@@ -76,18 +76,7 @@ namespace EdaurodoBot.rsc.modules.allowlistmodule.config
                     mainmessage: new MainMessage(
                         buttonlink: "https://youtu.be/Sagg08DrO5U?t=0",
                         content: null,
-                        embed: new Embed()
-                        {
-                            Color = "#2B2D31",
-                            Title = new EmbedTitle() { Text = "Você ainda não configurou uma mensage para iniciar a AllowList" },
-                            Description =
-                            "### `Esta é a mensagem padrão da aplicação`\n\n" +
-                            "> Navege pelos arquivos de configuração da aplicação\n" +
-                            "> Encontre o arquivo 'allowlist.cfg.json' e procure o campo\n" +
-                            "> 'messages' -> 'main_fixed_message' para altertar esta mensagem\n\n" +
-                            "## `Use o comando \"/Create Embed\" para criar e obter o JSON`"
-                        })
-                ));
+                        embed: null)));
 
             string json = JsonConvert.SerializeObject(config, Formatting.Indented);
             using (StreamWriter sw = new StreamWriter(file.Create(), EdaurodoUtilities.UTF8))

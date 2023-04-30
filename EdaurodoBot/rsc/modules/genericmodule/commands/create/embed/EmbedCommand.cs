@@ -2,79 +2,43 @@
 using DSharpPlus.SlashCommands;
 using DSharpPlus;
 using Newtonsoft.Json;
+using EdaurodoBot.rsc.utils;
 
 namespace EdaurodoBot.rsc.modules.genericmodule.commands.create.embed
 {
     public sealed class EmbedCommand
     {
+
         private InteractionContext Context;
         private DiscordClient Client;
         private DiscordInteraction Interaction;
         private DiscordChannel Channel;
-        private DiscordMember _member;
+        private DiscordMember Member;
 
-        private Embed _embed;
+        private EdaurodoEmbed _embed;
         private int FieldIndex;
-        private EmbedField? FieldSelect;
-        private List<EmbedField>? _fieldList;
-        private Dictionary<string, string> _colorsCollection;
+        private EdaurodoEmbedField? FieldSelect;
+        private List<EdaurodoEmbedField>? _fieldList;
 
         public EmbedCommand(InteractionContext ctx)
         {
             Context = ctx;
             Client = ctx.Client;
             Channel = ctx.Channel;
-            _member = ctx.Member;
+            Member = ctx.Member;
 
-            _embed = new Embed()
-            {
-                Color = "#2B2D31",
-                Description = "Lembre-se que seu Embed não pode ser vazio!",
-                Thumbnail = null,
-                Image = null,
-                Author = new EmbedAuthor()
-                {
-                    Name = null,
-                    Image = null,
-                    Url = null,
-                },
-                Title = new EmbedTitle()
-                {
-                    Text = "Personalize abaixo",
-                    Url = null
-                },
-                Footer = new EmbedFooter()
-                {
-                    Text = null,
-                    Image = null,
-                    Timestamp = null
-                }
-            };
+            _embed = new EdaurodoEmbed(null, "### > * Lembre-se que seu Embed não pode ser vazio!\nPersonalize abaixo!", null, null, null, null, null, null);
+
             FieldIndex = 0;
             FieldSelect = null;
-            _fieldList = new List<EmbedField>();
-
-            StartColorsCollection();
+            _fieldList = new List<EdaurodoEmbedField>();
             SubmittedModal();
             CaptureButtons();
             CaptureSelectMenu();
         }
         public async Task ExecuteAsync()
         {
-            try
-            {
-                await Context.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().AddEmbed(GetEmbed()).AddComponents(GetMainMenuComponents()).AsEphemeral(true));
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(
-                    $"Message: {ex.Message}\n\n" +
-                    $"Source: {ex.Source}\n\n" +
-                    $"Inner Exception: {ex.InnerException}\n\n" +
-                    $"Target Site: {ex.TargetSite}\n\n" +
-                    $"Stack Trace: {ex.StackTrace}");
-                Console.WriteLine(ex.ToString());
-            }
+            await Context.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().AddEmbed(GetEmbed()).AddComponents(GetMainMenuComponents()).AsEphemeral(true));
         }
         private Task CaptureButtons()
         {
@@ -276,40 +240,8 @@ namespace EdaurodoBot.rsc.modules.genericmodule.commands.create.embed
         }
         private async Task JsonUpdate(string? json)
         {
-            Embed tempEmbed = JsonConvert.DeserializeObject<Embed>(json);
-            if (tempEmbed != null)
-            {
-                if (!string.IsNullOrEmpty(tempEmbed.Color)) { _embed.Color = tempEmbed.Color; } else { _embed.Color = "#2B2D31"; }
-                if (tempEmbed.Author != null)
-                {
-                    if (!string.IsNullOrEmpty(tempEmbed.Author.Name)) { _embed.Author.Name = tempEmbed.Author.Name; } else { _embed.Author.Name = null; }
-                    if (!string.IsNullOrEmpty(tempEmbed.Author.Url)) { _embed.Author.Url = tempEmbed.Author.Url; } else { _embed.Author.Url = null; }
-                    if (!string.IsNullOrEmpty(tempEmbed.Author.Image)) { _embed.Author.Image = tempEmbed.Author.Image; } else { _embed.Author.Image = null; }
-                }
-                else { _embed.Author = new EmbedAuthor() { Name = null, Url = null, Image = null }; }
-                if (tempEmbed.Title != null)
-                {
-                    if (!string.IsNullOrEmpty(tempEmbed.Title.Text)) { _embed.Title.Text = tempEmbed.Title.Text; } else { _embed.Title.Text = null; }
-                    if (!string.IsNullOrEmpty(tempEmbed.Title.Url)) { _embed.Title.Url = tempEmbed.Title.Url; } else { _embed.Title.Url = null; }
-                }
-                if (!string.IsNullOrEmpty(tempEmbed.Description)) { _embed.Description = tempEmbed.Description; } else { _embed.Description = null; }
-                if (!string.IsNullOrEmpty(tempEmbed.Thumbnail)) { _embed.Thumbnail = tempEmbed.Thumbnail; } else { _embed.Thumbnail = null; }
-                if (!string.IsNullOrEmpty(tempEmbed.Image)) { _embed.Image = tempEmbed.Image; } else { _embed.Image = null; }
+            _embed = JsonConvert.DeserializeObject<EdaurodoEmbed>(json);
 
-                if (tempEmbed.Footer != null)
-                {
-                    if (!string.IsNullOrEmpty(tempEmbed.Footer.Text) != null) { _embed.Footer.Text = tempEmbed.Footer.Text; } else { _embed.Footer.Text = null; }
-                    if (!string.IsNullOrEmpty(tempEmbed.Footer.Image) != null) { _embed.Footer.Image = tempEmbed.Footer.Image; } else { _embed.Footer.Image = null; }
-                    if (tempEmbed.Footer.Timestamp != null) { _embed.Footer.Timestamp = tempEmbed.Footer.Timestamp; }
-                }
-
-                if (tempEmbed.Fields != null)
-                {
-                    _fieldList.Clear();
-                    _fieldList = tempEmbed.Fields.ToList();
-                }
-                else { _fieldList.Clear(); }
-            }
             await UpdateMessageAsync();
         }
         private async Task FieldModal()
@@ -329,7 +261,7 @@ namespace EdaurodoBot.rsc.modules.genericmodule.commands.create.embed
                         WithCustomId($"{Context.Interaction.Id}-modal_field").
                         WithTitle("Configure seu Field.").
                         AddComponents(new TextInputComponent("Titulo", "form_title", "Titulo do field, pode ser usado formatação", FieldSelect.Title, true, TextInputStyle.Short, 0, 256)).
-                        AddComponents(new TextInputComponent("Conteudo", "form_content", "Conteudo do field, pode ser usado formatação", FieldSelect.Content, true, TextInputStyle.Paragraph, 0, 1024)).
+                        AddComponents(new TextInputComponent("Conteudo", "form_content", "Conteudo do field, pode ser usado formatação", FieldSelect.Value, true, TextInputStyle.Paragraph, 0, 1024)).
                         AddComponents(new TextInputComponent("Conteudo", "form_inline", "Use (SIM/TRUE) OU (NÃO/FALSE)", FieldSelect.Inline.ToString().ToLower(), true, TextInputStyle.Short, 0, 10))); ;
             }
         }
@@ -346,7 +278,7 @@ namespace EdaurodoBot.rsc.modules.genericmodule.commands.create.embed
 
                     if (inline) { if (_fieldList.Count > 1) { _fieldList[_fieldList.Count - 1].Inline = inline; } }
 
-                    _fieldList.Add(new EmbedField() { Title = fieldtitle, Content = fieldcontent, Inline = inline });
+                    _fieldList.Add(new EdaurodoEmbedField(fieldtitle, fieldcontent, inline));
                 }
             }
             else
@@ -359,7 +291,7 @@ namespace EdaurodoBot.rsc.modules.genericmodule.commands.create.embed
                     else { inline = false; }
 
                     _fieldList[FieldIndex].Title = fieldtitle;
-                    _fieldList[FieldIndex].Content = fieldcontent;
+                    _fieldList[FieldIndex].Value = fieldcontent;
 
                     if (FieldIndex > 0)
                     {
@@ -388,28 +320,18 @@ namespace EdaurodoBot.rsc.modules.genericmodule.commands.create.embed
             await Interaction.CreateResponseAsync(InteractionResponseType.Modal, new DiscordInteractionResponseBuilder().
                     WithCustomId($"{Context.Interaction.Id}-modal_color").
                     WithTitle("Altere a cor do seu Embed").
-                    AddComponents(new TextInputComponent("Cor", "form_color", "Envia a cor em formato HEX: (ex: #000000)", _embed.Color, false, TextInputStyle.Short, 7, 7)));
+                    AddComponents(new TextInputComponent("Cor", "form_color", "Envia a cor em formato HEX: (ex: #000000)", _embed.Color, false, TextInputStyle.Short, 6, 7)));
         }
         private async Task ColorUpdate(string? color)
         {
-            char[] hexChars = { '#', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'A', 'B', 'C', 'D', 'E', 'F' };
-            if (!string.IsNullOrEmpty(color))
+            if (EdaurodoUtilities.ValidateColorHex(color))
             {
-                color = color.ToUpper();
-                char[] arrayColor = color.ToCharArray();
-                if (arrayColor[0] == '#')
-                {
-                    for (int i = 0; i < arrayColor.Length; i++)
-                    {
-                        if (!hexChars.Contains(arrayColor[i]))
-                        {
-                            await Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().WithContent("Seu código HEX é invalido tente novamente").AsEphemeral(true));
-                        }
-                    }
-                    _embed.Color = color;
-                    await UpdateMessagaColorPannel();
-                }
-                else { await Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().WithContent("Seu código HEX é invalido tente novamente").AsEphemeral(true)); }
+                _embed.Color = color;
+                await UpdateMessagaColorPannel();
+            }
+            else
+            {
+                await Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().WithContent("Seu código HEX é invalido tente novamente").AsEphemeral(true));
             }
         }
         private async Task FooterModal()
@@ -417,23 +339,23 @@ namespace EdaurodoBot.rsc.modules.genericmodule.commands.create.embed
             await Interaction.CreateResponseAsync(InteractionResponseType.Modal, new DiscordInteractionResponseBuilder().
                     WithCustomId($"{Context.Interaction.Id}-modal_footer").
                     WithTitle("Personalize o rodapé do seu Embed").
-                    AddComponents(new TextInputComponent("Rodapé Texto", "form_footer", "(Opcional) Escreva sua assunatura ou tente @eu ou @kansas", _embed.Footer.Text, false, TextInputStyle.Short, 0, 2048)).
-                    AddComponents(new TextInputComponent("Rodapé Imagem", "form_footerimage", "(Opcional) cole um link direto da imagem ou tenet @eu ou @kansas", _embed.Footer.Image, false, TextInputStyle.Short)).
+                    AddComponents(new TextInputComponent("Rodapé Texto", "form_footer", "(Opcional) Escreva sua assunatura ou tente @eu ou @bot", _embed.Footer.Value, false, TextInputStyle.Short, 0, 2048)).
+                    AddComponents(new TextInputComponent("Rodapé Imagem", "form_footerimage", "(Opcional) cole um link direto da imagem ou tenet @eu ou @bot", _embed.Footer.Image, false, TextInputStyle.Short)).
                     AddComponents(new TextInputComponent("Rodapé Horário", "form_footertimestamp", "Use (SIM/TRUE) OU (NÃO/FALSE)", _embed.Footer.Timestamp.ToString(), false, TextInputStyle.Short)));
         }
         private async Task FooterUpdate(string? footer, string? footerimage, string? footertimestamp)
         {
             if (!string.IsNullOrEmpty(footer))
             {
-                if (footer.ToLower() == "@eu") { _embed.Footer.Text = _member.DisplayName; }
-                else if (footer.ToLower() == "@kansas") { _embed.Footer.Text = Client.CurrentUser.Username; }
-                else { _embed.Footer.Text = footer; }
+                if (footer.ToLower() == "@eu") { _embed.Footer.Value = Member.DisplayName; }
+                else if (footer.ToLower() == "@bot") { _embed.Footer.Value = Client.CurrentUser.Username; }
+                else { _embed.Footer.Value = footer; }
             }
-            else { _embed.Footer.Text = null; }
+            else { _embed.Footer.Value = null; }
             if (!string.IsNullOrEmpty(footerimage))
             {
-                if (footerimage.ToLower() == "@eu") { _embed.Footer.Image = _member.AvatarUrl; }
-                else if (footerimage.ToLower() == "@kansas") { _embed.Footer.Image = Client.CurrentUser.AvatarUrl; }
+                if (footerimage.ToLower() == "@eu") { _embed.Footer.Image = Member.AvatarUrl; }
+                else if (footerimage.ToLower() == "@bot") { _embed.Footer.Image = Client.CurrentUser.AvatarUrl; }
                 else
                 {
                     if (Uri.TryCreate(footerimage, UriKind.Absolute, out var uri)) { _embed.Footer.Image = uri.OriginalString; }
@@ -480,24 +402,24 @@ namespace EdaurodoBot.rsc.modules.genericmodule.commands.create.embed
             await Interaction.CreateResponseAsync(InteractionResponseType.Modal, new DiscordInteractionResponseBuilder().
                     WithCustomId($"{Context.Interaction.Id}-modal_author").
                     WithTitle("Personalize o autor do seu Embed").
-                    AddComponents(new TextInputComponent("Nome do autor", "form_author", "(Opcional) mas lebre-se que seu embed não pode ser vazio. Tente @eu ou @kansas", _embed.Author.Name, false, TextInputStyle.Short, 0, 256)).
-                    AddComponents(new TextInputComponent("Imagem do autor", "form_authorimage", "(Opcional) cole o link do avatar do author. Tente @eu ou @kansas", _embed.Author.Image, false, TextInputStyle.Short)).
+                    AddComponents(new TextInputComponent("Nome do autor", "form_author", "(Opcional) mas lebre-se que seu embed não pode ser vazio. Tente @eu ou @bot", _embed.Author.Name, false, TextInputStyle.Short, 0, 256)).
+                    AddComponents(new TextInputComponent("Imagem do autor", "form_authorimage", "(Opcional) cole o link do avatar do author. Tente @eu ou @bot", _embed.Author.Image, false, TextInputStyle.Short)).
                     AddComponents(new TextInputComponent("Url do autor", "form_authorurl", "(Opcional) cole um link para para o redirecionamento.", _embed.Author.Url, false, TextInputStyle.Short)));
         }
         private async Task AuthorUpdate(string? author, string? authorimage, string? authorurl)
         {
             if (!string.IsNullOrEmpty(author))
             {
-                if (author.ToLower() == "@eu") { _embed.Author.Name = _member.DisplayName; }
-                else if (author.ToLower() == "@kansas") { _embed.Author.Name = Client.CurrentUser.Username; }
+                if (author.ToLower() == "@eu") { _embed.Author.Name = Member.DisplayName; }
+                else if (author.ToLower() == "@bot") { _embed.Author.Name = Client.CurrentUser.Username; }
                 else { _embed.Author.Name = author; }
             }
             else { _embed.Author.Name = null; }
 
             if (!string.IsNullOrEmpty(authorimage))
             {
-                if (authorimage.ToLower() == "@eu") { _embed.Author.Image = _member.AvatarUrl; }
-                else if (authorimage.ToLower() == "@kansas") { _embed.Author.Image = Client.CurrentUser.AvatarUrl; }
+                if (authorimage.ToLower() == "@eu") { _embed.Author.Image = Member.AvatarUrl; }
+                else if (authorimage.ToLower() == "@bot") { _embed.Author.Image = Client.CurrentUser.AvatarUrl; }
                 else
                 {
                     if (Uri.TryCreate(authorimage, UriKind.Absolute, out var uri)) { _embed.Author.Image = uri.OriginalString; }
@@ -519,13 +441,13 @@ namespace EdaurodoBot.rsc.modules.genericmodule.commands.create.embed
             await Interaction.CreateResponseAsync(InteractionResponseType.Modal, new DiscordInteractionResponseBuilder().
                     WithCustomId($"{Context.Interaction.Id}-modal_title").
                     WithTitle("Personalize o título do seu Embed").
-                    AddComponents(new TextInputComponent("Título", "form_title", "(Opcional) mas lebre-se que seu embed não pode ser vazio", _embed.Title.Text, false, TextInputStyle.Short, 0, 2048)).
+                    AddComponents(new TextInputComponent("Título", "form_title", "(Opcional) mas lebre-se que seu embed não pode ser vazio", _embed.Title.Value, false, TextInputStyle.Short, 0, 2048)).
                     AddComponents(new TextInputComponent("Título URL", "form_titleurl", "(Opcional) cole um link para para o redirecionamento", _embed.Title.Url, false, TextInputStyle.Short)));
         }
         private async Task TitleUpdate(string? title, string? url)
         {
-            if (!string.IsNullOrEmpty(title)) { _embed.Title.Text = title; }
-            else { _embed.Title.Text = null; }
+            if (!string.IsNullOrEmpty(title)) { _embed.Title.Value = title; }
+            else { _embed.Title.Value = null; }
 
             if (!string.IsNullOrEmpty(url))
             {
@@ -548,41 +470,10 @@ namespace EdaurodoBot.rsc.modules.genericmodule.commands.create.embed
             else { _embed.Description = null; }
             await UpdateMessageAsync();
         }
+
         private async Task ExportJson()
         {
-            if (_embed.Author.Name == null && _embed.Author.Image == null) { _embed.Author = null; }
-            if (_embed.Title.Text == null) { _embed.Title = null; }
-            if (_fieldList.Count > 0) { _embed.Fields = _fieldList.ToArray(); }
-            if (_embed.Footer.Text == null && _embed.Footer.Image == null && (_embed.Footer.Timestamp == false || _embed.Footer.Timestamp == null)) { _embed.Footer = null; }
-            string json = JsonConvert.SerializeObject(_embed);
-            _embed.Fields = null;
-            if (_embed.Author == null)
-            {
-                _embed.Author = new EmbedAuthor()
-                {
-                    Name = null,
-                    Image = null,
-                    Url = null,
-                };
-            }
-            if (_embed.Title == null)
-            {
-                _embed.Title = new EmbedTitle()
-                {
-                    Text = null,
-                    Url = null,
-                };
-            }
-            if (_embed.Footer == null)
-            {
-                _embed.Footer = new EmbedFooter()
-                {
-                    Text = null,
-                    Image = null,
-                    Timestamp = null
-                };
-            }
-            await Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().AddEmbed(new DiscordEmbedBuilder().WithDescription($"```{json}```").WithColor(new DiscordColor("#2B2D31"))).AsEphemeral(true));
+            await Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().AddEmbed(new DiscordEmbedBuilder().WithDescription($"```{JsonConvert.SerializeObject(new EdaurodoEmbedSerializable(_embed))}```").WithColor(new DiscordColor("#2B2D31"))).AsEphemeral(true));
         }
         private async Task UpdateMessageAsync()
         {
@@ -608,13 +499,13 @@ namespace EdaurodoBot.rsc.modules.genericmodule.commands.create.embed
 
             if (_embed.Author.Name != null || _embed.Author.Image != null) { eb.WithAuthor(_embed.Author.Name, _embed.Author.Url, _embed.Author.Image); }
 
-            if (_embed.Title.Text != null) { eb.WithTitle(_embed.Title.Text); }
+            if (_embed.Title.Value != null) { eb.WithTitle(_embed.Title.Value); }
 
-            if (_embed.Title.Text != null && _embed.Title.Url != null) { eb.WithUrl(_embed.Title.Url); }
+            if (_embed.Title.Value != null && _embed.Title.Url != null) { eb.WithUrl(_embed.Title.Url); }
 
             if (_embed.Description != null) { eb.WithDescription(_embed.Description); }
 
-            if (_embed.Footer.Text != null || _embed.Footer.Image != null) { eb.WithFooter(_embed.Footer.Text, _embed.Footer.Image); }
+            if (_embed.Footer.Value != null || _embed.Footer.Image != null) { eb.WithFooter(_embed.Footer.Value, _embed.Footer.Image); }
 
             if (_embed.Footer.Timestamp ?? false) { eb.WithTimestamp(DateTime.Now.ToLocalTime()); }
 
@@ -622,7 +513,7 @@ namespace EdaurodoBot.rsc.modules.genericmodule.commands.create.embed
             {
                 foreach (var field in _fieldList)
                 {
-                    eb.AddField(field.Title, field.Content, field.Inline ?? false);
+                    eb.AddField(field.Title, field.Value, field.Inline ?? false);
                 }
             }
             return eb.Build();
@@ -674,7 +565,7 @@ namespace EdaurodoBot.rsc.modules.genericmodule.commands.create.embed
             selectOptions.Clear();
             DiscordComponentEmoji emoji_add = new DiscordComponentEmoji(DiscordEmoji.FromName(Client, ":heavy_plus_sign:"));
             selectOptions.Add(new DiscordSelectComponentOption("Adicione um código HEX", "select_colorhex", null, false, emoji_add));
-            foreach (var color in _colorsCollection)
+            foreach (var color in EdaurodoEmbed.Colors)
             {
                 selectOptions.Add(new DiscordSelectComponentOption(color.Value, color.Key, null, false, null));
             }
@@ -725,7 +616,7 @@ namespace EdaurodoBot.rsc.modules.genericmodule.commands.create.embed
                 foreach (var field in _fieldList)
                 {
                     string title = field.Title;
-                    string content = field.Content;
+                    string content = field.Value;
                     if (title.Length > 50) { title = title.Substring(0, 50); }
                     if (content.Length > 50) { content = content.Substring(0, 50); }
                     selectOptions.Add(new DiscordSelectComponentOption($"{i}. {title}", $"{i - 1}", content, false, null));
@@ -747,36 +638,6 @@ namespace EdaurodoBot.rsc.modules.genericmodule.commands.create.embed
             components_lines.Add(new DiscordActionRowComponent(button_downline));
 
             return components_lines;
-        }
-        private Task StartColorsCollection()
-        {
-            _colorsCollection = new Dictionary<string, string>();
-            _colorsCollection.Clear();
-            _colorsCollection.Add("#2B2D31", "Neutro");
-            _colorsCollection.Add("#F0FFFF", "Azure");
-            _colorsCollection.Add("#6495ED", "CornflowerBlue");
-            _colorsCollection.Add("#FF7F50", "Coral");
-            _colorsCollection.Add("#E9967A", "DarkSalmon");
-            _colorsCollection.Add("#FF1493", "DeepPink");
-            _colorsCollection.Add("#00BFFF", "DeepSkyBlue");
-            _colorsCollection.Add("#B22222", "FireBrick");
-            _colorsCollection.Add("#FF69B4", "HotPink");
-            _colorsCollection.Add("#CD5C5C", "IndianRed");
-            _colorsCollection.Add("#F0E68C", "Khaki");
-            _colorsCollection.Add("#20B2AA", "LightSeaGreen");
-            _colorsCollection.Add("#B0C4DE", "LightSteelBlue");
-            _colorsCollection.Add("#FFE4E1", "MistyRose");
-            _colorsCollection.Add("#FFE4B5", "Moccasin");
-            _colorsCollection.Add("#98FB98", "PaleGreen");
-            _colorsCollection.Add("#AFEEEE", "PaleTurquoise");
-            _colorsCollection.Add("#DB7093", "PaleVioletRed");
-            _colorsCollection.Add("#FFDAB9", "PeachPuff");
-            _colorsCollection.Add("#B0E0E6", "PowderBlue");
-            _colorsCollection.Add("#FA8072", "Salmon");
-            _colorsCollection.Add("#008080", "Teal");
-            _colorsCollection.Add("#FF6347", "Tomato");
-            _colorsCollection.Add("#FFFF00", "Yellow");
-            return Task.CompletedTask;
         }
     }
 }

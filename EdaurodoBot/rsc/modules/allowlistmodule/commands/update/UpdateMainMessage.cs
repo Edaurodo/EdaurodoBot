@@ -1,9 +1,7 @@
 ﻿using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
-using Newtonsoft.Json;
 using EdaurodoBot.rsc.modules.allowlistmodule.services;
-using EdaurodoBot.rsc.modules.genericmodule.commands.create.embed;
 using EdaurodoBot.rsc.utils;
 
 namespace EdaurodoBot.rsc.modules.allowlistmodule.commands.update
@@ -12,7 +10,7 @@ namespace EdaurodoBot.rsc.modules.allowlistmodule.commands.update
     {
         private InteractionContext Context;
         private AllowlistService Module;
-        private Embed _embed;
+        private EdaurodoEmbed _embed;
         public UpdateMainMessage(InteractionContext context, AllowlistService service)
         {
             Context = context;
