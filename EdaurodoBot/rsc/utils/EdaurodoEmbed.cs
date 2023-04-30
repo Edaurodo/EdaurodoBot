@@ -32,7 +32,6 @@ namespace EdaurodoBot.rsc.utils
         [JsonProperty("fields", NullValueHandling = NullValueHandling.Ignore)]
         private IEnumerable<EdaurodoEmbedField>? _fields;
 
-
         [JsonIgnore]
         public string? Color
         {
@@ -75,7 +74,6 @@ namespace EdaurodoBot.rsc.utils
             get => _footer;
             set => _footer = value != null && (value.Value != null || value.Image != null || value.Timestamp == true) ? value : new EdaurodoEmbedFooter(null, null, false);
         }
-
         [JsonIgnore]
         public IEnumerable<EdaurodoEmbedField>? Fields
         {
@@ -114,6 +112,7 @@ namespace EdaurodoBot.rsc.utils
             {"#FF6347", "Tomato"},
             {"#FFFF00", "Yellow"},
         }.ToImmutableDictionary();
+
         public EdaurodoEmbed(string? color, string? description, string? thumbnail, string? image, EdaurodoEmbedAuthor? author, EdaurodoEmbedTitle? title, EdaurodoEmbedFooter? footer, IEnumerable<EdaurodoEmbedField>? fields)
         {
             Color = color;

@@ -1,7 +1,6 @@
 ﻿using DSharpPlus;
 using EdaurodoBot.rsc.modules.allowlistmodule.data;
 using EdaurodoBot.rsc.modules.allowlistmodule.utilities;
-using EdaurodoBot.rsc.modules.genericmodule.commands.create.embed;
 using EdaurodoBot.rsc.utils;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
