@@ -48,13 +48,13 @@ namespace EdaurodoBot.rsc.utils
         public string? Thumbnail
         {
             get => _thumbnail;
-            set => _thumbnail = Uri.TryCreate(value, UriKind.Absolute, out var url) ? value : null;
+            set => _thumbnail = Uri.TryCreate(value, UriKind.Absolute, out _) ? value : null;
         }
         [JsonIgnore]
         public string? Image
         {
             get => _image;
-            set => _image = Uri.TryCreate(value, UriKind.Absolute, out var url) ? value : null;
+            set => _image = Uri.TryCreate(value, UriKind.Absolute, out _) ? value : null;
         }
         [JsonIgnore]
         public EdaurodoEmbedAuthor? Author
@@ -84,7 +84,6 @@ namespace EdaurodoBot.rsc.utils
                 else { _fields = new List<EdaurodoEmbedField>(); }
             }
         }
-
         [JsonIgnore]
         public static ImmutableDictionary<string, string> Colors { get; } = new Dictionary<string, string>() {
             {"#2B2D31", "Neutro" },
@@ -112,7 +111,6 @@ namespace EdaurodoBot.rsc.utils
             {"#FF6347", "Tomato"},
             {"#FFFF00", "Yellow"},
         }.ToImmutableDictionary();
-
         public EdaurodoEmbed(string? color, string? description, string? thumbnail, string? image, EdaurodoEmbedAuthor? author, EdaurodoEmbedTitle? title, EdaurodoEmbedFooter? footer, IEnumerable<EdaurodoEmbedField>? fields)
         {
             Color = color;
@@ -133,7 +131,6 @@ namespace EdaurodoBot.rsc.utils
         private string? _image;
         [JsonProperty("url", NullValueHandling = NullValueHandling.Ignore)]
         private string? _url;
-
         [JsonIgnore]
         public string? Name
         {
@@ -144,15 +141,14 @@ namespace EdaurodoBot.rsc.utils
         public string? Image
         {
             get => _image;
-            set => _image = Uri.TryCreate(value, UriKind.Absolute, out Uri url) ? value : null;
+            set => _image = Uri.TryCreate(value, UriKind.Absolute, out _) ? value : null;
         }
         [JsonIgnore]
         public string? Url
         {
             get => _url;
-            set => _url = Uri.TryCreate(value, UriKind.Absolute, out Uri urk) && this._name != null ? value : null;
+            set => _url = Uri.TryCreate(value, UriKind.Absolute, out _) && this._name != null ? value : null;
         }
-
         public EdaurodoEmbedAuthor(string? name, string? image, string? url)
         {
             Name = name;
@@ -166,7 +162,6 @@ namespace EdaurodoBot.rsc.utils
         private string? _value;
         [JsonProperty("url", NullValueHandling = NullValueHandling.Ignore)]
         private string? _url;
-
         [JsonIgnore]
         public string? Value
         {
@@ -177,7 +172,7 @@ namespace EdaurodoBot.rsc.utils
         public string? Url
         {
             get => _url;
-            set => _url = this._value != null && Uri.TryCreate(value, UriKind.Absolute, out Uri url) ? value : null;
+            set => _url = this._value != null && Uri.TryCreate(value, UriKind.Absolute, out _) ? value : null;
         }
         public EdaurodoEmbedTitle(string? value, string? url)
         {
@@ -193,7 +188,6 @@ namespace EdaurodoBot.rsc.utils
         private string? _value;
         [JsonProperty("inline")]
         private bool? _inline;
-
         [JsonIgnore]
         public string? Title
         {
@@ -206,7 +200,6 @@ namespace EdaurodoBot.rsc.utils
             get => _value;
             set => _value = !string.IsNullOrWhiteSpace(value) && _title != null && value.Length <= 1024 ? value : null;
         }
-
         [JsonIgnore]
         public bool? Inline
         {
@@ -228,7 +221,6 @@ namespace EdaurodoBot.rsc.utils
         private string? _image;
         [JsonProperty("timestamp", NullValueHandling = NullValueHandling.Ignore)]
         public bool? _timestamp;
-
         [JsonIgnore]
         public string? Value
         {
@@ -239,7 +231,7 @@ namespace EdaurodoBot.rsc.utils
         public string? Image
         {
             get => _image;
-            set => _image = Uri.TryCreate(value, UriKind.Absolute, out Uri url) ? value : null;
+            set => _image = Uri.TryCreate(value, UriKind.Absolute, out _) ? value : null;
         }
         [JsonIgnore]
         public bool? Timestamp
@@ -247,7 +239,6 @@ namespace EdaurodoBot.rsc.utils
             get => _timestamp;
             set => _timestamp = value != null ? value : null;
         }
-
         public EdaurodoEmbedFooter(string? value, string? image, bool? timestamp)
         {
             Value = value;
@@ -255,8 +246,6 @@ namespace EdaurodoBot.rsc.utils
             Timestamp = timestamp;
         }
     }
-
-
     public sealed class EdaurodoEmbedSerializable
     {
         [JsonProperty("color", NullValueHandling = NullValueHandling.Ignore)]
@@ -282,8 +271,6 @@ namespace EdaurodoBot.rsc.utils
 
         [JsonProperty("fields", NullValueHandling = NullValueHandling.Ignore)]
         private IEnumerable<EdaurodoEmbedField>? _fields;
-
-
         [JsonIgnore]
         public string? Color
         {
@@ -300,13 +287,13 @@ namespace EdaurodoBot.rsc.utils
         public string? Thumbnail
         {
             get => _thumbnail;
-            private set => _thumbnail = Uri.TryCreate(value, UriKind.Absolute, out var url) ? value : null;
+            private set => _thumbnail = Uri.TryCreate(value, UriKind.Absolute, out _) ? value : null;
         }
         [JsonIgnore]
         public string? Image
         {
             get => _image;
-            private set => _image = Uri.TryCreate(value, UriKind.Absolute, out var url) ? value : null;
+            private set => _image = Uri.TryCreate(value, UriKind.Absolute, out _) ? value : null;
         }
         [JsonIgnore]
         public EdaurodoEmbedAuthor? Author

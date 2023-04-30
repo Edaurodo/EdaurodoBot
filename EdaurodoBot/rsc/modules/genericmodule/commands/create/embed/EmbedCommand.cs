@@ -314,12 +314,16 @@ namespace EdaurodoBot.rsc.modules.genericmodule.commands.create.embed
             if (value.ToLower() == "@eu") { _embed.Footer.Value = _member.DisplayName; }
             else if (value.ToLower() == "@bot") { _embed.Footer.Value = _client.CurrentUser.Username; }
             else { _embed.Footer.Value = value; }
-            if (image.ToLower() == "@eu") { _embed.Footer.Image = _member.AvatarUrl; }
-            else if (image.ToLower() == "@bot") { _embed.Footer.Image = _client.CurrentUser.AvatarUrl; }
-            else
+
+            if (!string.IsNullOrWhiteSpace(image))
             {
-                if (Uri.TryCreate(image, UriKind.Absolute, out var uri)) { _embed.Footer.Image = uri.OriginalString; }
-                else { await SendErrorMessage("> * **Não consegui atualizar o rodapé do Embed, verifique se a URL é válida**"); return; }
+                if (image.ToLower() == "@eu") { _embed.Footer.Image = _member.AvatarUrl; }
+                else if (image.ToLower() == "@bot") { _embed.Footer.Image = _client.CurrentUser.AvatarUrl; }
+                else
+                {
+                    if (Uri.TryCreate(image, UriKind.Absolute, out _)) { _embed.Footer.Image = image; }
+                    else { await SendErrorMessage("> * **Não consegui atualizar o rodapé do Embed, verifique se a URL é válida**"); return; }
+                }
             }
             _embed.Footer.Timestamp = timestamp.ToLower() == "sim" || timestamp.ToLower() == "true" ? true : false;
             await UpdateMessageAsync();
@@ -334,10 +338,16 @@ namespace EdaurodoBot.rsc.modules.genericmodule.commands.create.embed
         }
         private async Task ImageUpdate(string? image, string? thumbnail)
         {
-            if (!string.IsNullOrWhiteSpace(image) && Uri.TryCreate(image, UriKind.Absolute, out Uri? _url)) { _embed.Image = image; }
-            else { await SendErrorMessage("> * **Não consegui atualizar as imagens do Embed, verifique se as URL's é válida**"); return; }
-            if (!string.IsNullOrWhiteSpace(thumbnail) && Uri.TryCreate(thumbnail, UriKind.Absolute, out Uri? __url)) { _embed.Thumbnail = thumbnail; }
-            else { await SendErrorMessage("> * **Não consegui atualizar as imagens do Embed, verifique se as URL's é válida**"); return; }
+            if (!string.IsNullOrWhiteSpace(image))
+            {
+                if (Uri.TryCreate(image, UriKind.Absolute, out _)) { _embed.Image = image; }
+                else { await SendErrorMessage("> * **Não consegui atualizar as imagens do Embed, verifique se as URL's é válida**"); return; }
+            }
+            if (!string.IsNullOrWhiteSpace(thumbnail))
+            {
+                if (Uri.TryCreate(thumbnail, UriKind.Absolute, out _)) { _embed.Thumbnail = thumbnail; }
+                else { await SendErrorMessage("> * **Não consegui atualizar as imagens do Embed, verifique se as URL's é válida**"); return; }
+            }
             await UpdateMessageAsync();
         }
         private async Task AuthorModal()
@@ -354,15 +364,21 @@ namespace EdaurodoBot.rsc.modules.genericmodule.commands.create.embed
             if (value.ToLower() == "@eu") { _embed.Author.Name = _member.DisplayName; }
             else if (value.ToLower() == "@bot") { _embed.Author.Name = _client.CurrentUser.Username; }
             else { _embed.Author.Name = value; }
-            if (image.ToLower() == "@eu") { _embed.Author.Image = _member.AvatarUrl; }
-            else if (image.ToLower() == "@bot") { _embed.Author.Image = _client.CurrentUser.AvatarUrl; }
-            else
+            if (!string.IsNullOrWhiteSpace(image))
             {
-                if (!string.IsNullOrWhiteSpace(image) && Uri.TryCreate(image, UriKind.Absolute, out var _url)) { _embed.Author.Image = image; }
-                else { await SendErrorMessage("> * **Não consegui atualizar as informações do author, verifique se as URL's é válida**"); return; }
+                if (image.ToLower() == "@eu") { _embed.Author.Image = _member.AvatarUrl; }
+                else if (image.ToLower() == "@bot") { _embed.Author.Image = _client.CurrentUser.AvatarUrl; }
+                else
+                {
+                    if (Uri.TryCreate(image, UriKind.Absolute, out _)) { _embed.Author.Image = image; }
+                    else { await SendErrorMessage("> * **Não consegui atualizar as informações do author, verifique se as URL's é válida**"); return; }
+                }
             }
-            if (!string.IsNullOrWhiteSpace(url) && Uri.TryCreate(url, UriKind.Absolute, out var __url)) { _embed.Author.Url = url; }
-            else { await SendErrorMessage("Não consegui atualizar as informações do author, verifique se as URL's é válida**"); return; }
+            if (!string.IsNullOrWhiteSpace(url))
+            {
+                if (Uri.TryCreate(url, UriKind.Absolute, out _)) { _embed.Author.Url = url; }
+                else { await SendErrorMessage("Não consegui atualizar as informações do author, verifique se as URL's é válida**"); return; }
+            }
             await UpdateMessageAsync();
         }
         private async Task TitleModal()
@@ -376,8 +392,11 @@ namespace EdaurodoBot.rsc.modules.genericmodule.commands.create.embed
         private async Task TitleUpdate(string? title, string? url)
         {
             _embed.Title.Value = title;
-            if (!string.IsNullOrWhiteSpace(url) && Uri.TryCreate(url, UriKind.Absolute, out var _uri)) { _embed.Title.Url = url; }
-            else { await SendErrorMessage("> * **Não consegui atualizar as informações do seu titulo, verifique se a URL é válida**"); return; }
+            if (!string.IsNullOrWhiteSpace(url))
+            {
+                if (Uri.TryCreate(url, UriKind.Absolute, out _)) { _embed.Title.Url = url; }
+                else { await SendErrorMessage("> * **Não consegui atualizar as informações do seu titulo, verifique se a URL é válida**"); return; }
+            }
             await UpdateMessageAsync();
         }
         private async Task DescriptionModal()
