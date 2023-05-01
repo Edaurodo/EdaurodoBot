@@ -3,6 +3,7 @@ using DSharpPlus.SlashCommands;
 using DSharpPlus;
 using Newtonsoft.Json;
 using EdaurodoBot.rsc.utils;
+using EdaurodoBot.rsc.exceptions;
 
 namespace EdaurodoBot.rsc.modules.genericmodule.commands.create.embed
 {
@@ -250,18 +251,19 @@ namespace EdaurodoBot.rsc.modules.genericmodule.commands.create.embed
                         AddComponents(new TextInputComponent("Conteudo", "form_inline", "Use (SIM/TRUE) OU (NÃO/FALSE)", _embed.Fields.ElementAt(_fieldIndex).Inline.ToString().ToLower(), true, TextInputStyle.Short, 0, 10)));
             }
         }
-        private async Task FieldUpdate(string? title, string? value, string? inlinestring)
+        private Task FieldUpdate(string? title, string? value, string? inlinestring)
         {
-            if (!string.IsNullOrEmpty(title) && !string.IsNullOrEmpty(value))
-            {
-                bool inline = inlinestring.ToLower() == "true" || inlinestring.ToLower() == "sim" ? true : false;
-                if (_fieldIndex < 0)
+            bool inline = inlinestring.ToLower() == "true" || inlinestring.ToLower() == "sim" ? true : false;
+            _ = string.IsNullOrWhiteSpace(title) || string.IsNullOrWhiteSpace(value) ? throw new EdaurodoEmbedArgumentException("> * **Os campos do seu field não pode conter apenas espaçoes em brancos!**", _interaction) :
+                _fieldIndex < 0 ?
+                Task.Run(async () =>
                 {
                     var temp = _embed.Fields.ToList();
                     temp.Add(new EdaurodoEmbedField(title, value, inline));
                     _embed.Fields = temp;
-                }
-                else
+                    await UpdateMessagaFieldPannel();
+                }) :
+                Task.Run(async () =>
                 {
                     var temp = _embed.Fields.ToList();
                     temp[_fieldIndex].Title = title;
@@ -270,11 +272,9 @@ namespace EdaurodoBot.rsc.modules.genericmodule.commands.create.embed
                     if (_fieldIndex > 0 && inline) { temp[_fieldIndex - 1].Inline = inline; }
                     _embed.Fields = temp;
                     _fieldIndex = -1;
-                }
-                await UpdateMessagaFieldPannel();
-            }
-            else
-            { await SendErrorMessage("> * **Os campos do seu field não pode conter apenas espaços em branco!**"); }
+                    await UpdateMessagaFieldPannel();
+                });
+            return Task.CompletedTask;
         }
         private async Task FieldDelete()
         {
@@ -291,14 +291,15 @@ namespace EdaurodoBot.rsc.modules.genericmodule.commands.create.embed
                     WithTitle("Altere a cor do seu Embed").
                     AddComponents(new TextInputComponent("Cor", "form_color", "Envia a cor em formato HEX: (ex: #000000)", _embed.Color, false, TextInputStyle.Short, 6, 7)));
         }
-        private async Task ColorUpdate(string? color)
+        private Task ColorUpdate(string? color)
         {
-            if (EdaurodoUtilities.ValidateColorHex(color))
-            {
-                _embed.Color = color;
-                await UpdateMessagaColorPannel();
-            }
-            else { await SendErrorMessage("Seu código HEX é inválido tente novamente"); }
+            _ = EdaurodoUtilities.ValidateColorHex(color) ?
+                Task.Run(async () =>
+                {
+                    _embed.Color = color;
+                    await UpdateMessagaColorPannel();
+                }) : throw new EdaurodoEmbedArgumentException("> * **Seu código HEX é inválido tente novamente**", _interaction);
+            return Task.CompletedTask;
         }
         private async Task FooterModal()
         {
@@ -311,21 +312,16 @@ namespace EdaurodoBot.rsc.modules.genericmodule.commands.create.embed
         }
         private async Task FooterUpdate(string? value, string? image, string? timestamp)
         {
-            if (value.ToLower() == "@eu") { _embed.Footer.Value = _member.DisplayName; }
-            else if (value.ToLower() == "@bot") { _embed.Footer.Value = _client.CurrentUser.Username; }
-            else { _embed.Footer.Value = value; }
+            _embed.Footer.Value = value.ToLower() == "@eu" ? _member.DisplayName : value.ToLower() == "@bot" ? _client.CurrentUser.Username : value;
 
-            if (!string.IsNullOrWhiteSpace(image))
-            {
-                if (image.ToLower() == "@eu") { _embed.Footer.Image = _member.AvatarUrl; }
-                else if (image.ToLower() == "@bot") { _embed.Footer.Image = _client.CurrentUser.AvatarUrl; }
-                else
-                {
-                    if (Uri.TryCreate(image, UriKind.Absolute, out _)) { _embed.Footer.Image = image; }
-                    else { await SendErrorMessage("> * **Não consegui atualizar o rodapé do Embed, verifique se a URL é válida**"); return; }
-                }
-            }
             _embed.Footer.Timestamp = timestamp.ToLower() == "sim" || timestamp.ToLower() == "true" ? true : false;
+
+            _embed.Footer.Image = string.IsNullOrWhiteSpace(image) ? null :
+                image.ToLower() == "@eu" ? _member.AvatarUrl :
+                image.ToLower() == "@bot" ? _client.CurrentUser.AvatarUrl :
+                Uri.TryCreate(image, UriKind.Absolute, out _) ? image :
+                throw new EdaurodoEmbedArgumentException("> * **Não consegui atualizar o rodapé do Embed, verifique se a URL é válida**", _interaction);
+
             await UpdateMessageAsync();
         }
         private async Task ImageModal()
@@ -338,16 +334,14 @@ namespace EdaurodoBot.rsc.modules.genericmodule.commands.create.embed
         }
         private async Task ImageUpdate(string? image, string? thumbnail)
         {
-            if (!string.IsNullOrWhiteSpace(image))
-            {
-                if (Uri.TryCreate(image, UriKind.Absolute, out _)) { _embed.Image = image; }
-                else { await SendErrorMessage("> * **Não consegui atualizar as imagens do Embed, verifique se as URL's é válida**"); return; }
-            }
-            if (!string.IsNullOrWhiteSpace(thumbnail))
-            {
-                if (Uri.TryCreate(thumbnail, UriKind.Absolute, out _)) { _embed.Thumbnail = thumbnail; }
-                else { await SendErrorMessage("> * **Não consegui atualizar as imagens do Embed, verifique se as URL's é válida**"); return; }
-            }
+            _embed.Image = string.IsNullOrWhiteSpace(image) ? null :
+                Uri.TryCreate(image, UriKind.Absolute, out _) ? image :
+                throw new EdaurodoEmbedArgumentException("> * **Não consegui atualizar as imagens do Embed, verifique se as URL's é válida**", _interaction);
+
+            _embed.Thumbnail = string.IsNullOrWhiteSpace(thumbnail) ? null :
+                Uri.TryCreate(thumbnail, UriKind.Absolute, out _) ? thumbnail :
+                throw new EdaurodoEmbedArgumentException("> * **Não consegui atualizar as imagens do Embed, verifique se as URL's é válida**", _interaction);
+
             await UpdateMessageAsync();
         }
         private async Task AuthorModal()
@@ -361,24 +355,17 @@ namespace EdaurodoBot.rsc.modules.genericmodule.commands.create.embed
         }
         private async Task AuthorUpdate(string? value, string? image, string? url)
         {
-            if (value.ToLower() == "@eu") { _embed.Author.Name = _member.DisplayName; }
-            else if (value.ToLower() == "@bot") { _embed.Author.Name = _client.CurrentUser.Username; }
-            else { _embed.Author.Name = value; }
-            if (!string.IsNullOrWhiteSpace(image))
-            {
-                if (image.ToLower() == "@eu") { _embed.Author.Image = _member.AvatarUrl; }
-                else if (image.ToLower() == "@bot") { _embed.Author.Image = _client.CurrentUser.AvatarUrl; }
-                else
-                {
-                    if (Uri.TryCreate(image, UriKind.Absolute, out _)) { _embed.Author.Image = image; }
-                    else { await SendErrorMessage("> * **Não consegui atualizar as informações do author, verifique se as URL's é válida**"); return; }
-                }
-            }
-            if (!string.IsNullOrWhiteSpace(url))
-            {
-                if (Uri.TryCreate(url, UriKind.Absolute, out _)) { _embed.Author.Url = url; }
-                else { await SendErrorMessage("Não consegui atualizar as informações do author, verifique se as URL's é válida**"); return; }
-            }
+            _embed.Author.Name = value.ToLower() == "@eu" ? _member.DisplayName : value.ToLower() == "@bot" ? _client.CurrentUser.Username : value;
+
+            _embed.Author.Url = string.IsNullOrWhiteSpace(url) ? null : Uri.TryCreate(url, UriKind.Absolute, out _) ? url :
+                throw new EdaurodoEmbedArgumentException("> * **Não consegui atualizar as informações do author, verifique se as URL's é válida**", _interaction);
+
+            _embed.Author.Image = string.IsNullOrWhiteSpace(image) ? null :
+                image.ToLower() == "@eu" ? _member.AvatarUrl :
+                image.ToLower() == "@bot" ? _client.CurrentUser.AvatarUrl :
+                Uri.TryCreate(image, UriKind.Absolute, out _) ? image :
+                throw new EdaurodoEmbedArgumentException("> * **Não consegui atualizar as informações do author, verifique se as URL's é válida**", _interaction);
+
             await UpdateMessageAsync();
         }
         private async Task TitleModal()
@@ -392,11 +379,10 @@ namespace EdaurodoBot.rsc.modules.genericmodule.commands.create.embed
         private async Task TitleUpdate(string? title, string? url)
         {
             _embed.Title.Value = title;
-            if (!string.IsNullOrWhiteSpace(url))
-            {
-                if (Uri.TryCreate(url, UriKind.Absolute, out _)) { _embed.Title.Url = url; }
-                else { await SendErrorMessage("> * **Não consegui atualizar as informações do seu titulo, verifique se a URL é válida**"); return; }
-            }
+
+            _embed.Title.Url = string.IsNullOrWhiteSpace(url) ? null : Uri.TryCreate(url, UriKind.Absolute, out _) ? url :
+                throw new EdaurodoEmbedArgumentException("> * **Não consegui atualizar as informações do seu titulo, verifique se a URL é válida**", _interaction);
+
             await UpdateMessageAsync();
         }
         private async Task DescriptionModal()
@@ -430,15 +416,17 @@ namespace EdaurodoBot.rsc.modules.genericmodule.commands.create.embed
         private DiscordEmbed GetEmbed()
         {
             DiscordEmbedBuilder eb = new DiscordEmbedBuilder();
+            
             eb.WithColor(new DiscordColor(_embed.Color));
-            if (_embed.Image != null) { eb.WithImageUrl(_embed.Image); }
-            if (_embed.Thumbnail != null) { eb.WithThumbnail(_embed.Thumbnail); }
-            if (_embed.Author.Name != null || _embed.Author.Image != null) { eb.WithAuthor(_embed.Author.Name, _embed.Author.Url, _embed.Author.Image); }
-            if (_embed.Title.Value != null) { eb.WithTitle(_embed.Title.Value); }
-            if (_embed.Title.Value != null && _embed.Title.Url != null) { eb.WithUrl(_embed.Title.Url); }
-            if (_embed.Description != null) { eb.WithDescription(_embed.Description); }
-            if (_embed.Footer.Value != null || _embed.Footer.Image != null) { eb.WithFooter(_embed.Footer.Value, _embed.Footer.Image); }
-            if (_embed.Footer.Timestamp ?? false) { eb.WithTimestamp(DateTime.Now.ToLocalTime()); }
+            _ = _embed.Author.Name is null && _embed.Author.Image is null ? null : eb.WithAuthor(_embed.Author.Name, _embed.Author.Url, _embed.Author.Image);
+            _ = _embed.Title.Value is null ? null : eb.WithTitle(_embed.Title.Value);
+            _ = _embed.Title.Url is null ? null : eb.WithUrl(_embed.Title.Url);
+            _ = _embed.Description is null ? null : eb.WithDescription(_embed.Description);
+            _ = _embed.Thumbnail is null ? null : eb.WithThumbnail(_embed.Thumbnail);
+            _ = _embed.Image is null ? null : eb.WithImageUrl(_embed.Image);
+            _ = _embed.Footer.Value is null && _embed.Footer.Image is null ? null : eb.WithFooter(_embed.Footer.Value, _embed.Footer.Image);
+            _ = _embed.Footer.Timestamp is null || _embed.Footer.Timestamp is false ? null : eb.WithTimestamp(DateTime.Now.ToLocalTime());
+
             if (_embed.Fields.Count() > 0)
             {
                 foreach (var field in _embed.Fields)
@@ -508,10 +496,6 @@ namespace EdaurodoBot.rsc.modules.genericmodule.commands.create.embed
             new DiscordActionRowComponent(button_line)
             };
             return components_lines;
-        }
-        private async Task SendErrorMessage(string message)
-        {
-            await _interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().WithContent(message).AsEphemeral(true));
         }
         private IEnumerable<DiscordActionRowComponent> GetFieldMenuComponents()
         {

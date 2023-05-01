@@ -1,8 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System.Collections.Immutable;
-using System.Drawing;
 using System.Text.RegularExpressions;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace EdaurodoBot.rsc.utils
 {
@@ -42,7 +40,7 @@ namespace EdaurodoBot.rsc.utils
         public string? Description
         {
             get => _description;
-            set => _description = !string.IsNullOrWhiteSpace(value) && value.Length <= 4096 ? value : null;
+            set => _description = string.IsNullOrWhiteSpace(value) || value.Length > 4096 ? null : value;
         }
         [JsonIgnore]
         public string? Thumbnail
@@ -60,29 +58,25 @@ namespace EdaurodoBot.rsc.utils
         public EdaurodoEmbedAuthor? Author
         {
             get => _author;
-            set => _author = value != null && (value.Name != null || value.Image != null) ? value : new EdaurodoEmbedAuthor(null, null, null);
+            set => _author = value is null || (value.Name is null && value.Image is null) ? new EdaurodoEmbedAuthor(null, null, null) : value;
         }
         [JsonIgnore]
         public EdaurodoEmbedTitle? Title
         {
             get => _title;
-            set => _title = value != null && value.Value != null ? value : new EdaurodoEmbedTitle(null, null);
+            set => _title = value is null || value.Value is null ? new EdaurodoEmbedTitle(null, null) : value;
         }
         [JsonIgnore]
         public EdaurodoEmbedFooter? Footer
         {
             get => _footer;
-            set => _footer = value != null && (value.Value != null || value.Image != null || value.Timestamp == true) ? value : new EdaurodoEmbedFooter(null, null, false);
+            set => _footer = value is null || (value.Value is null && value.Image is null && (value.Timestamp is null || value.Timestamp is false)) ? new EdaurodoEmbedFooter(null, null, false) : value;
         }
         [JsonIgnore]
         public IEnumerable<EdaurodoEmbedField>? Fields
         {
             get => _fields;
-            set
-            {
-                if (value != null && value.Count() <= 25) { _fields = value.ToList().FindAll(_ => _ != null && _.Title != null && _.Value != null && _.Inline != null); }
-                else { _fields = new List<EdaurodoEmbedField>(); }
-            }
+            set => _fields = value is null || value.Count() > 25 ? new List<EdaurodoEmbedField>() : value.ToList().FindAll(_ => !(_ is null || _.Title is null || _.Value is null || _.Inline is null));
         }
         [JsonIgnore]
         public static ImmutableDictionary<string, string> Colors { get; } = new Dictionary<string, string>() {
@@ -135,7 +129,7 @@ namespace EdaurodoBot.rsc.utils
         public string? Name
         {
             get => _name;
-            set => _name = !string.IsNullOrWhiteSpace(value) && value.Length <= 256 ? value : null;
+            set => _name = string.IsNullOrWhiteSpace(value) || value.Length > 256 ? null : value;
         }
         [JsonIgnore]
         public string? Image
@@ -147,7 +141,7 @@ namespace EdaurodoBot.rsc.utils
         public string? Url
         {
             get => _url;
-            set => _url = Uri.TryCreate(value, UriKind.Absolute, out _) && this._name != null ? value : null;
+            set => _url = !(this._name is null) && Uri.TryCreate(value, UriKind.Absolute, out _) ? value : null;
         }
         public EdaurodoEmbedAuthor(string? name, string? image, string? url)
         {
@@ -166,13 +160,13 @@ namespace EdaurodoBot.rsc.utils
         public string? Value
         {
             get => _value;
-            set => _value = !string.IsNullOrWhiteSpace(value) && value.Length <= 256 ? value : null;
+            set => _value = string.IsNullOrWhiteSpace(value) || value.Length > 256 ? null : value;
         }
         [JsonIgnore]
         public string? Url
         {
             get => _url;
-            set => _url = this._value != null && Uri.TryCreate(value, UriKind.Absolute, out _) ? value : null;
+            set => _url = !(this._value is null) && Uri.TryCreate(value, UriKind.Absolute, out _) ? value : null;
         }
         public EdaurodoEmbedTitle(string? value, string? url)
         {
@@ -192,19 +186,19 @@ namespace EdaurodoBot.rsc.utils
         public string? Title
         {
             get => _title;
-            set => _title = !string.IsNullOrWhiteSpace(value) && value.Length <= 256 ? value : null;
+            set => _title = string.IsNullOrWhiteSpace(value) || value.Length > 256 ? null : value;
         }
         [JsonIgnore]
         public string? Value
         {
             get => _value;
-            set => _value = !string.IsNullOrWhiteSpace(value) && _title != null && value.Length <= 1024 ? value : null;
+            set => _value = string.IsNullOrWhiteSpace(value) || this._title is null || value.Length > 1024 ? null : value;
         }
         [JsonIgnore]
         public bool? Inline
         {
             get => _inline;
-            set => _inline = value != null && _title != null && _value != null ? value : null;
+            set => _inline = value is null || this._title is null || this._value is null ? null : value;
         }
         public EdaurodoEmbedField(string title, string value, bool inline)
         {
@@ -225,7 +219,7 @@ namespace EdaurodoBot.rsc.utils
         public string? Value
         {
             get => _value;
-            set => _value = !string.IsNullOrEmpty(value) && value.Length <= 2048 ? value : null;
+            set => _value = string.IsNullOrEmpty(value) || value.Length > 2048 ? null : value;
         }
         [JsonIgnore]
         public string? Image
@@ -237,7 +231,7 @@ namespace EdaurodoBot.rsc.utils
         public bool? Timestamp
         {
             get => _timestamp;
-            set => _timestamp = value != null ? value : null;
+            set => _timestamp = value is null || value is false ? null : value;
         }
         public EdaurodoEmbedFooter(string? value, string? image, bool? timestamp)
         {
@@ -281,7 +275,7 @@ namespace EdaurodoBot.rsc.utils
         public string? Description
         {
             get => _description;
-            private set => _description = !string.IsNullOrWhiteSpace(value) && value.Length <= 4096 ? value : null;
+            private set => _description = string.IsNullOrWhiteSpace(value) || value.Length > 4096 ? null : value;
         }
         [JsonIgnore]
         public string? Thumbnail
@@ -299,38 +293,28 @@ namespace EdaurodoBot.rsc.utils
         public EdaurodoEmbedAuthor? Author
         {
             get => _author;
-            private set => _author = value != null && (value.Name != null || value.Image != null) ? value : null;
+            private set => _author = value is null || (value.Name is null && value.Image is null) ? null : value;
         }
         [JsonIgnore]
         public EdaurodoEmbedTitle? Title
         {
             get => _title;
-            private set => _title = value != null && value.Value != null ? value : null;
+            private set => _title = value is null || value.Value is null ? null : value;
         }
         [JsonIgnore]
         public EdaurodoEmbedFooter? Footer
         {
             get => _footer;
-            private set => _footer = value != null && (value.Value != null || value.Image != null || value.Timestamp == true) ? value : null;
+            private set => _footer = value is null || (value.Value is null && value.Image is null && value.Timestamp is false) ? null : value;
         }
 
         [JsonIgnore]
         public IEnumerable<EdaurodoEmbedField>? Fields
         {
             get => _fields;
-            private set
-            {
-                if (value != null && value.Count() <= 25)
-                {
-                    var temp = value.ToList().FindAll(_ => _ != null && _.Title != null && _.Value != null && _.Inline != null);
-                    if (temp.Count > 0) { _fields = temp; }
-                    else { _fields = null; }
-                }
-                else
-                {
-                    _fields = null;
-                }
-            }
+            private set => _fields = value is null || value.Count() > 25 ? null :
+                value.ToList().FindAll(_ => !(_ is null || _.Title is null || _.Value is null || _.Inline is null)).Count > 0 ?
+                value.ToList().FindAll(_ => !(_ is null || _.Title is null || _.Value is null || _.Inline is null)) : null;
         }
         public EdaurodoEmbedSerializable(EdaurodoEmbed embed)
         {

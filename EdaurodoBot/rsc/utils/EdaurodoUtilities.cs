@@ -1,6 +1,5 @@
 ﻿using DSharpPlus.Entities;
 using EdaurodoBot.rsc.core;
-using Microsoft.Extensions.Logging;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -10,7 +9,7 @@ namespace EdaurodoBot.rsc.utils
     {
         public static UTF8Encoding UTF8 { get; } = new UTF8Encoding(false);
 
-        public static DiscordEmbed GetEmbedFromJson(EdaurodoEmbed embed, EdaurodoMain Application)
+        public static DiscordEmbed GetEmbedFromJson(EdaurodoEmbed embed)
         {
             DiscordEmbedBuilder eb = new DiscordEmbedBuilder();
 
