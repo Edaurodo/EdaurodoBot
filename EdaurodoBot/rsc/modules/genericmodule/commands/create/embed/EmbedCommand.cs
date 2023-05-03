@@ -30,7 +30,7 @@ namespace EdaurodoBot.rsc.modules.genericmodule.commands.create.embed
         }
         public async Task ExecuteAsync()
         {
-            await _context.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().AddEmbed(GetEmbed()).AddComponents(GetMainMenuComponents()).AsEphemeral(true));
+            await _context.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().AddEmbed(EdaurodoUtilities.DiscordEmbedParse(_embed)).AddComponents(GetMainMenuComponents()).AsEphemeral(true));
         }
         private Task CaptureButtons()
         {
@@ -112,7 +112,7 @@ namespace EdaurodoBot.rsc.modules.genericmodule.commands.create.embed
                         else if (s.Id.Contains("btn_sendembed"))
                         {
                             _interaction = s.Interaction;
-                            await _channel.SendMessageAsync(new DiscordMessageBuilder().WithEmbed(GetEmbed()));
+                            await _channel.SendMessageAsync(new DiscordMessageBuilder().WithEmbed(EdaurodoUtilities.DiscordEmbedParse(_embed)));
                             await UpdateMessageAsync();
                         }
                     }
@@ -403,38 +403,15 @@ namespace EdaurodoBot.rsc.modules.genericmodule.commands.create.embed
         }
         private async Task UpdateMessageAsync()
         {
-            await _interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder().AddEmbed(GetEmbed()).AddComponents(GetMainMenuComponents()));
+            await _interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder().AddEmbed(EdaurodoUtilities.DiscordEmbedParse(_embed)).AddComponents(GetMainMenuComponents()));
         }
         private async Task UpdateMessagaColorPannel()
         {
-            await _interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder().AddEmbed(GetEmbed()).AddComponents(GetColorMenuComponents()));
+            await _interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder().AddEmbed(EdaurodoUtilities.DiscordEmbedParse(_embed)).AddComponents(GetColorMenuComponents()));
         }
         private async Task UpdateMessagaFieldPannel()
         {
-            await _interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder().AddEmbed(GetEmbed()).AddComponents(GetFieldMenuComponents()));
-        }
-        private DiscordEmbed GetEmbed()
-        {
-            DiscordEmbedBuilder eb = new DiscordEmbedBuilder();
-            
-            eb.WithColor(new DiscordColor(_embed.Color));
-            _ = _embed.Author.Name is null && _embed.Author.Image is null ? null : eb.WithAuthor(_embed.Author.Name, _embed.Author.Url, _embed.Author.Image);
-            _ = _embed.Title.Value is null ? null : eb.WithTitle(_embed.Title.Value);
-            _ = _embed.Title.Url is null ? null : eb.WithUrl(_embed.Title.Url);
-            _ = _embed.Description is null ? null : eb.WithDescription(_embed.Description);
-            _ = _embed.Thumbnail is null ? null : eb.WithThumbnail(_embed.Thumbnail);
-            _ = _embed.Image is null ? null : eb.WithImageUrl(_embed.Image);
-            _ = _embed.Footer.Value is null && _embed.Footer.Image is null ? null : eb.WithFooter(_embed.Footer.Value, _embed.Footer.Image);
-            _ = _embed.Footer.Timestamp is null || _embed.Footer.Timestamp is false ? null : eb.WithTimestamp(DateTime.Now.ToLocalTime());
-
-            if (_embed.Fields.Count() > 0)
-            {
-                foreach (var field in _embed.Fields)
-                {
-                    eb.AddField(field.Title, field.Value, field.Inline ?? false);
-                }
-            }
-            return eb.Build();
+            await _interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder().AddEmbed(EdaurodoUtilities.DiscordEmbedParse(_embed)).AddComponents(GetFieldMenuComponents()));
         }
         private IEnumerable<DiscordActionRowComponent> GetMainMenuComponents()
         {

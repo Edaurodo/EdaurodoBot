@@ -19,7 +19,7 @@ namespace EdaurodoBot.rsc.modules.allowlistmodule.services
         private string? DataSerialized;
         public List<AllowlistData> Data { get; private set; }
         public EdaurodoMain Bot { get; }
-        public AllowlistConfig? Config { get; private set; }
+        public ConfigAllowlist? Config { get; private set; }
 
         public AllowlistService(EdaurodoMain bot)
         {
@@ -171,7 +171,7 @@ namespace EdaurodoBot.rsc.modules.allowlistmodule.services
                 if (Config != null && Config.Use)
                 {
                     Bot.Client.GuildDownloadCompleted += Allowlist_GuildDownloadCompleted;
-                    Bot.SlashCommands.RegisterCommands<AllowlistCommands>(Bot.Config.InternalConfig.GuildId);
+                    Bot.SlashCommands.RegisterCommands<AllowlistCommands>(Bot.Config.SecretConfig.GuildId);
                     Bot.SlashCommands.RefreshCommands();
                     Data = data;
                     Bot.Client.Logger.LogInformation(new EventId(777, "AllowlistService"), "AllowlistModule inicializado: OK!");
@@ -188,7 +188,7 @@ namespace EdaurodoBot.rsc.modules.allowlistmodule.services
             Bot.Client.ModalSubmitted += Allowlist_ModalSubmitted;
             Bot.Client.ComponentInteractionCreated += Allowlist_ComponentInteractionCreated;
 
-            args.Guilds[Bot.Config.InternalConfig.GuildId].Channels[(ulong)Config.Channels.CategoryId].Children.ToList()
+            args.Guilds[Bot.Config.SecretConfig.GuildId].Channels[(ulong)Config.Channels.CategoryId].Children.ToList()
                 .FindAll(_ => _.Type == 0 && _.Id != (ulong)Config.Channels.MainId && _.Id != (ulong)Config.Channels.ApprovedId && _.Id != (ulong)Config.Channels.ReprovedId && _.Id != (ulong)Config.Channels.InterviewId && _.Id != (ulong)Config.Channels.ChangeNameId)
                 .ForEach(async _ => { await _.DeleteAsync(); });
             return Task.CompletedTask;
@@ -218,7 +218,7 @@ namespace EdaurodoBot.rsc.modules.allowlistmodule.services
                 await args.Member.ModifyAsync(_ =>
                 {
                     List<DiscordRole> roles = args.Member.Roles.ToList();
-                    roles.Add(args.Guild.GetRole((ulong)Config.Roles.ReprovedId));
+                    roles.Add(args.Guild.GetRole((ulong)Config.Roles.DefaultId));
                     _.Roles = roles;
                 });
             });

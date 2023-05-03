@@ -105,7 +105,7 @@ namespace EdaurodoBot.rsc.utils
             {"#FF6347", "Tomato"},
             {"#FFFF00", "Yellow"},
         }.ToImmutableDictionary();
-        public EdaurodoEmbed(string? color, string? description, string? thumbnail, string? image, EdaurodoEmbedAuthor? author, EdaurodoEmbedTitle? title, EdaurodoEmbedFooter? footer, IEnumerable<EdaurodoEmbedField>? fields)
+        public EdaurodoEmbed(string? color = null, string? description = null, string? thumbnail = null, string? image = null, EdaurodoEmbedAuthor? author = null, EdaurodoEmbedTitle? title = null, EdaurodoEmbedFooter? footer = null, IEnumerable<EdaurodoEmbedField>? fields = null)
         {
             Color = color;
             Description = description;

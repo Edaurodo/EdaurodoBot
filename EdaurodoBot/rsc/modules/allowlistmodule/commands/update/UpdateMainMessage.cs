@@ -28,7 +28,7 @@ namespace EdaurodoBot.rsc.modules.allowlistmodule.commands.update
             var channel = _context.Guild.GetChannel((ulong)_module.Config.Channels.MainId);
             if (channel != null)
             {
-                await channel.SendMessageAsync(new DiscordMessageBuilder().AddEmbed(EdaurodoUtilities.GetEmbedFromJson(_embed)).AddComponents(GetButtons()));
+                await channel.SendMessageAsync(new DiscordMessageBuilder().AddEmbed(EdaurodoUtilities.DiscordEmbedParse(_embed)).AddComponents(GetButtons()));
             }
         }
         private IEnumerable<DiscordActionRowComponent> GetButtons()

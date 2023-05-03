@@ -5,22 +5,24 @@ using DSharpPlus.Interactivity.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using EdaurodoBot.rsc.modules.genericmodule.commands.info;
 using EdaurodoBot.rsc.modules.allowlistmodule.services;
-using EdaurodoBot.rsc.core.data;
 using EdaurodoBot.rsc.modules.genericmodule.commands.create;
+using EdaurodoBot.rsc.modules.musicmodule.services;
+using EdaurodoBot.rsc.core.config;
 
 namespace EdaurodoBot.rsc.core
 {
     public sealed class EdaurodoMain
     {
-        public EdaurodoConfig Config { get; }
-        public DiscordClient Client { get; }
+        public ConfigEdaurodo Config { get; }
+        public DiscordClient Client { get; private set; }
         public InteractivityExtension? InteractivityExtension { get; private set; }
         public SlashCommandsExtension? SlashCommands { get; set; }
         public IServiceProvider Services { get; private set; }
 
-        public EdaurodoMain(EdaurodoConfig config)
+        public EdaurodoMain(ConfigEdaurodo config)
         {
             Config = config;
+
             Client = new DiscordClient(new DiscordConfiguration()
             {
                 Token = Config.Discord.Token,
@@ -32,7 +34,10 @@ namespace EdaurodoBot.rsc.core
 
             Services = new ServiceCollection()
                 .AddSingleton(new AllowlistService(this))
+                .AddSingleton(new LavalinkService(this.Client, Config.Music.Lavalink))
+                .AddSingleton(new YoutubeSearchProvider(Config.Music.YoutubeApi.ApiKey))
                 .BuildServiceProvider();
+
 
             SlashCommands = Client.UseSlashCommands(new SlashCommandsConfiguration() { Services = Services });
 
@@ -41,8 +46,8 @@ namespace EdaurodoBot.rsc.core
                 Timeout = TimeSpan.FromMinutes(3)
             });
 
-            SlashCommands.RegisterCommands<CreateCommand>(Config.InternalConfig.GuildId);
-            SlashCommands.RegisterCommands<InfoCommand>(Config.InternalConfig.GuildId);
+            SlashCommands.RegisterCommands<CreateCommand>(Config.SecretConfig.GuildId);
+            SlashCommands.RegisterCommands<InfoCommand>(Config.SecretConfig.GuildId);
 
         }
         public async Task<Task> StartAsync()
