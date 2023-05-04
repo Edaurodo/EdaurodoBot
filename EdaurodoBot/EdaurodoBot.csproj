@@ -13,7 +13,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="rsc\modules\musicmodule\data\" />
     <Folder Include="rsc\modules\musicmodule\utils\" />
     <Folder Include="rsc\services\" />
   </ItemGroup>

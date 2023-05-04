@@ -8,6 +8,7 @@ using EdaurodoBot.rsc.modules.allowlistmodule.services;
 using EdaurodoBot.rsc.modules.genericmodule.commands.create;
 using EdaurodoBot.rsc.modules.musicmodule.services;
 using EdaurodoBot.rsc.core.config;
+using EdaurodoBot.rsc.utils.commands;
 
 namespace EdaurodoBot.rsc.core
 {
@@ -34,20 +35,21 @@ namespace EdaurodoBot.rsc.core
 
             Services = new ServiceCollection()
                 .AddSingleton(new AllowlistService(this))
-                .AddSingleton(new LavalinkService(this.Client, Config.Music.Lavalink))
+                .AddSingleton(new LavalinkService(this.Client, Config.Music))
                 .AddSingleton(new YoutubeSearchProvider(Config.Music.YoutubeApi.ApiKey))
+                .AddSingleton<MusicService>()
                 .BuildServiceProvider();
 
 
-            SlashCommands = Client.UseSlashCommands(new SlashCommandsConfiguration() { Services = Services });
+            SlashCommands = Client.UseSlashCommands(new SlashCommandsConfiguration() { Services = this.Services });
 
             InteractivityExtension = Client.UseInteractivity(new InteractivityConfiguration()
             {
                 Timeout = TimeSpan.FromMinutes(3)
             });
-
-            SlashCommands.RegisterCommands<CreateCommand>(Config.SecretConfig.GuildId);
-            SlashCommands.RegisterCommands<InfoCommand>(Config.SecretConfig.GuildId);
+            SlashCommands.RegisterCommands<TestCommand>(1079344320991215677);
+            SlashCommands.RegisterCommands<CreateCommand>();
+            SlashCommands.RegisterCommands<InfoCommand>();
 
         }
         public async Task<Task> StartAsync()

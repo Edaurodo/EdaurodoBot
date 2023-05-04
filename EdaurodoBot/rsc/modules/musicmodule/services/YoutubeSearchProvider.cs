@@ -1,5 +1,7 @@
-﻿using EdaurodoBot.rsc.utils;
-using System.Net;
+﻿using EdaurodoBot.rsc.modules.musicmodule.data;
+using EdaurodoBot.rsc.utils;
+using Newtonsoft.Json.Linq;
+using System.Web;
 
 namespace EdaurodoBot.rsc.modules.musicmodule.services
 {
@@ -11,7 +13,23 @@ namespace EdaurodoBot.rsc.modules.musicmodule.services
         public YoutubeSearchProvider(string apikey)
         {
             _apiKey = apikey;
-            _http = new HttpClient() { BaseAddress = new Uri("https://youtube.googleapis.com/youtube/v3/search") };
+            _http = new HttpClient() { BaseAddress = new Uri("https://www.googleapis.com/youtube/v3/search") };
         }
-    }
+
+        public async Task<YoutubeSearchResult> SearchSong(string terms)
+        {  
+            Uri url = new Uri($"https://www.googleapis.com/youtube/v3/search?maxResults=1&type=video&videoCategoryId=10&part=snippet&fields=items(id.videoId,snippet.channelTitle,snippet.title,snippet.thumbnails.high.url)&key={_apiKey}&q={HttpUtility.UrlEncode(terms)}");
+            IEnumerable<YoutubeApiResponse>? value;
+             
+            using(var sr = new StreamReader(_http.GetAsync(url).GetAwaiter().GetResult().Content.ReadAsStream(), EdaurodoUtilities.UTF8))
+            {
+                string json = await sr.ReadToEndAsync();
+                sr.Close();
+                Console.WriteLine(json);
+                var data = JObject.Parse(json);
+                value = data["items"].ToObject<IEnumerable<YoutubeApiResponse>>();
+            }
+            return new YoutubeSearchResult(value.First());
+        }
+     }
 }

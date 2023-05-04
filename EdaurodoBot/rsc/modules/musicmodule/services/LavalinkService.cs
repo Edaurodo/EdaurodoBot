@@ -9,29 +9,33 @@ namespace EdaurodoBot.rsc.modules.musicmodule.services
     public sealed class LavalinkService
     {
         private DiscordClient _client;
-        private ConfigLavalink _config;
-        private LavalinkNodeConnection _connection;
+        private ConfigMusic _config;
+        public LavalinkNodeConnection Node { get; private set; }
 
-        public LavalinkService(DiscordClient client, ConfigLavalink config)
+        public LavalinkService(DiscordClient client, ConfigMusic config)
         {
             _client = client;
             _config = config;
             _client.Ready += Lavalink_Ready;
         }
 
+
+
         private Task Lavalink_Ready(DiscordClient sender, ReadyEventArgs args)
         {
-            _ = Task.Run(async () =>
+            if (_config.Use)
             {
-                var lava = _client.UseLavalink();
-                _connection = await lava.ConnectAsync(new LavalinkConfiguration()
+                _ = Task.Run(async () =>
                 {
-                    Password = _config.Password,
-                    RestEndpoint = new ConnectionEndpoint(_config.Hostname, _config.Port),
-                    SocketEndpoint = new ConnectionEndpoint(_config.Hostname, _config.Port)
+                    var lava = _client.UseLavalink();
+                    Node = await lava.ConnectAsync(new LavalinkConfiguration()
+                    {
+                        Password = _config.Lavalink.Password,
+                        RestEndpoint = new ConnectionEndpoint(_config.Lavalink.Hostname, _config.Lavalink.Port),
+                        SocketEndpoint = new ConnectionEndpoint(_config.Lavalink.Hostname, _config.Lavalink.Port)
+                    });
                 });
-            });
-
+            }
             return Task.CompletedTask;
         }
     }

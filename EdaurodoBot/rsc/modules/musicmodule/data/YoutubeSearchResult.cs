@@ -2,40 +2,83 @@
 
 namespace EdaurodoBot.rsc.modules.musicmodule.data
 {
-    public struct YoutubeSearchResult
+    public class YoutubeSearchResult
     {
         public string Author { get; }
-        public string Title { get;}
-        public string Id { get;}
+        public string Name { get; }
+        public string Thumbnail { get; }
+        public Uri TrackUrl { get; }
 
-        public YoutubeSearchResult(string author, string title, string Id)
+        public YoutubeSearchResult(YoutubeApiResponse response)
         {
-            this.Author = author;
-            this.Title = title;
-            this.Id = Id;
+            this.Author = response.Snippet.ChannelTitle;
+            this.Name = response.Snippet.Title;
+            this.Thumbnail = response.Snippet.Thumbnails.Large.Url;
+            this.TrackUrl = new Uri($"https://youtu.be/{response.Id.VideoId}");
+        }
+        public override string ToString()
+        {
+            return $"Nome: {this.Name}\n\nAuthor: {this.Author}\n\nThumbnail_Link: {this.Thumbnail}\n\nVideo_Link: {this.TrackUrl.OriginalString}";
         }
     }
-    
     public struct YoutubeApiResponse
     {
         [JsonProperty("id")]
-        public ResponseId Id { get; }
-
+        public IdResponse Id { get; private set; }
         [JsonProperty("snippet")]
-        public ResponseSnippet Snippet { get; }
+        public SnippetResponse Snippet { get; private set; }
 
-
-        public struct ResponseId
+        public override string ToString()
         {
-            [JsonProperty("videoId")]
-            public string VideoId { get; }
+            return $"id:\n-{Id}\nsnippet:\n-{Snippet}\n";
         }
-        public struct ResponseSnippet
+    }
+    public struct IdResponse
+    {
+        [JsonProperty("videoId")]
+        public string VideoId { get; private set; }
+
+        public override string ToString()
         {
-            [JsonProperty("channelTitle")]
-            public string Author { get; }
-            [JsonProperty("title")]
-            public string Title { get; }
+            return $"videoId: {VideoId}\n";
+        }
+    }
+
+    public struct SnippetResponse
+    {
+        [JsonProperty("title")]
+        public string Title { get; private set; }
+
+        [JsonProperty("thumbnails")]
+        public SnippetThumbnail Thumbnails { get; private set; }
+
+        [JsonProperty("channelTitle")]
+        public string ChannelTitle { get; private set; }
+        public override string ToString()
+        {
+            return $"title: {Title}\nthumbnail:\n-{Thumbnails}\nchannelTitle: {ChannelTitle}\n";
+        }
+    }
+
+    public struct SnippetThumbnail
+    {
+        [JsonProperty("high")]
+        public ThumbnailLarge Large { get; private set; }
+
+        public override string ToString()
+        {
+            return $"high:\n-{Large}\n";
+        }
+    }
+
+    public struct ThumbnailLarge
+    {
+        [JsonProperty("url")]
+        public string Url { get; private set; }
+
+        public override string ToString()
+        {
+            return $"url: {Url}\n";
         }
     }
 }
