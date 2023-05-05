@@ -20,7 +20,7 @@ namespace EdaurodoBot.rsc.modules.musicmodule.services
         {
             if(_data.TryGetValue(guild.Id, out var data)){ return data; }
 
-            data = _data.AddOrUpdate(guild.Id, new GuildMusicData(), (k, v) => v);
+            data = _data.AddOrUpdate(guild.Id, new GuildMusicData(_lavalink), (k, v) => v);
             return data;
         }
 

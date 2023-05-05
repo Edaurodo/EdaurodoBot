@@ -9,6 +9,14 @@ namespace EdaurodoBot.rsc.modules.musicmodule.data
         public string Name { get; }
         public string Thumbnail { get; }
 
+        public MusicItem(LavalinkTrack track, YoutubeSearchResult result)
+        {
+            Track = track;
+            Author = result.Author;
+            Name = result.Name;
+            Thumbnail = result.Thumbnail;
+        }
+
         public MusicItem(MusicItem musicitem)
         {
             Track = musicitem.Track;
