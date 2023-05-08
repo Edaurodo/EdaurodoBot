@@ -243,11 +243,9 @@ namespace EdaurodoBot.rsc.modules.allowlistmodule.services
                             readerCategories.Add(await guild.CreateChannelCategoryAsync(
                                 $"reader-{reader.Id}",
                                 new List<DiscordOverwriteBuilder>() {
-                                    new DiscordOverwriteBuilder()
-                                    .For(guild.EveryoneRole)
+                                    new DiscordOverwriteBuilder(guild.EveryoneRole)
                                     .Deny(Permissions.AccessChannels),
-                                    new DiscordOverwriteBuilder()
-                                    .For(reader)
+                                    new DiscordOverwriteBuilder(reader)
                                     .Deny(Permissions.SendMessages)
                                     .Allow(Permissions.AccessChannels)
                                     .Allow(Permissions.ReadMessageHistory)

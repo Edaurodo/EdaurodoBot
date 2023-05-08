@@ -12,7 +12,6 @@ namespace EdaurodoBot.rsc.modules.allowlistmodule
         private DiscordGuild Guild;
         private Allowlist(DiscordMember member, DiscordGuild guild)
         {
-
             this.Member = member;
             this.Guild = guild;
         }
@@ -35,9 +34,9 @@ namespace EdaurodoBot.rsc.modules.allowlistmodule
                     await data.IncrementCurrentQuestion();
                     await allowlist.CreateAllowlistChannel(data, config, allowlist);
                 }
-                if (data.Interaction.ChannelId == data.AllowlistUserChannel.Id)
+                if (data?.Interaction?.ChannelId == data?.AllowlistUserChannel?.Id)
                 {
-                    if (data.CurrentQuestion < config.Questions.Count()) { await allowlist.UpdateMessageQuiz(data, config); }
+                    if (data?.CurrentQuestion < config.Questions.Count()) { await allowlist.UpdateMessageQuiz(data, config); }
                     else
                     {
                         if (await allowlist.QuizApproved(data, config)) { if (data.CurrentForm != Form.None) { await allowlist.SendFormToUser(data.Interaction, config, data.CurrentForm); } else { await allowlist.FinalizeAllowlist(data, config, allowlist, true); } }
@@ -189,7 +188,7 @@ namespace EdaurodoBot.rsc.modules.allowlistmodule
 
                 _ = Task.Run(async () =>
                 {
-                    Task.Delay(30000);
+                    await Task.Delay(30000);
                     await DeleteChannelAsync(data.AllowlistUserChannel);
                 });
             }

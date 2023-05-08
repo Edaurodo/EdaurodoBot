@@ -1,6 +1,4 @@
-﻿using DSharpPlus;
-using DSharpPlus.Entities;
-using Microsoft.VisualBasic;
+﻿using DSharpPlus.Entities;
 
 namespace EdaurodoBot.rsc.exceptions
 {
@@ -12,7 +10,7 @@ namespace EdaurodoBot.rsc.exceptions
         public CommandCancelledException(string messsage, Exception innerException) : base(messsage, innerException) { }
         public CommandCancelledException(string message, DiscordInteraction interaction)
         {
-            interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().WithContent(message).AsEphemeral(true)).GetAwaiter().GetResult();
+            interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent(message)).GetAwaiter().GetResult();
         }
     }
 }

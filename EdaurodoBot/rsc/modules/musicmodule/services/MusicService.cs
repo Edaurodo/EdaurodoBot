@@ -16,12 +16,12 @@ namespace EdaurodoBot.rsc.modules.musicmodule.services
             _data = new ConcurrentDictionary<ulong, GuildMusicData>();
         }
 
-        public async Task<GuildMusicData> GetOrCreateMusicDataAsync(DiscordGuild guild)
+        public Task<GuildMusicData> GetOrCreateMusicDataAsync(DiscordGuild guild)
         {
-            if(_data.TryGetValue(guild.Id, out var data)){ return data; }
+            if(_data.TryGetValue(guild.Id, out var data)){ return Task.FromResult(data); }
 
             data = _data.AddOrUpdate(guild.Id, new GuildMusicData(_lavalink), (k, v) => v);
-            return data;
+            return Task.FromResult(data);
         }
 
         public async Task<LavalinkLoadResult> GetTrackAsync(Uri url) => await _lavalink.Node.Rest.GetTracksAsync(url);

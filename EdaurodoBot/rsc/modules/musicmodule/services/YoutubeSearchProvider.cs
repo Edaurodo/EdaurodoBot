@@ -18,7 +18,7 @@ namespace EdaurodoBot.rsc.modules.musicmodule.services
 
         public async Task<IEnumerable<YoutubeSearchResult>> SearchSongAsync(string terms)
         {
-            Uri url = new Uri($"https://www.googleapis.com/youtube/v3/search?maxResults=1&type=video&videoCategoryId=10&part=snippet&fields=items(id.videoId,snippet.channelTitle,snippet.title,snippet.thumbnails.high.url)&key={_apiKey}&q={HttpUtility.UrlEncode(terms)}");
+            Uri url = new Uri($"https://www.googleapis.com/youtube/v3/search?maxResults=1&type=video&videoCategoryId=10&part=snippet&fields=items(id.videoId,snippet.channelTitle,snippet.title)&key={_apiKey}&q={HttpUtility.UrlEncode(terms)}");
 
             IEnumerable<YoutubeApiResponse>? values;
             using (var sr = new StreamReader(_http.GetAsync(url).GetAwaiter().GetResult().Content.ReadAsStream(), EdaurodoUtilities.UTF8))

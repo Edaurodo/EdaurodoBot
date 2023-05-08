@@ -143,7 +143,7 @@ namespace EdaurodoBot.rsc.utils
             get => _url;
             set => _url = !(this._name is null) && Uri.TryCreate(value, UriKind.Absolute, out _) ? value : null;
         }
-        public EdaurodoEmbedAuthor(string? name, string? image, string? url)
+        public EdaurodoEmbedAuthor(string? name = null, string? image = null, string? url = null)
         {
             Name = name;
             Image = image;

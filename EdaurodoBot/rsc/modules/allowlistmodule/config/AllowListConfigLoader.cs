@@ -109,7 +109,7 @@ namespace EdaurodoBot.rsc.modules.allowlistmodule.config
                             {
                                 foreach (var question in config.Questions)
                                 {
-                                    if (question.Question == null || question.Alternatives == null || question.Alternatives.Count() < 1 || question.CorrectAnswer == null || question.CorrectAnswer < 1 || question.CorrectAnswer > question.Alternatives.Count())
+                                    if (question.Question == null || question.Alternatives == null || question.Alternatives.Count() < 1 || question.CorrectAnswer < 1 || question.CorrectAnswer > question.Alternatives.Count())
                                     {
                                         Client.Logger.LogCritical(new EventId(777, "AllowlistConfigLoader"), $"ERRO NAS CONFIGURAÇÔES: ALGUM CAMPO EM 'questions' no arquivo 'allowlist.cfg.json' É NULO OU FORA DE CONTEXTO!");
                                         throw new Exception();

@@ -9,6 +9,7 @@ using EdaurodoBot.rsc.modules.genericmodule.commands.create;
 using EdaurodoBot.rsc.modules.musicmodule.services;
 using EdaurodoBot.rsc.core.config;
 using EdaurodoBot.rsc.utils.commands;
+using EdaurodoBot.rsc.modules.musicmodule.commands;
 
 namespace EdaurodoBot.rsc.core
 {
@@ -47,7 +48,7 @@ namespace EdaurodoBot.rsc.core
             {
                 Timeout = TimeSpan.FromMinutes(3)
             });
-            SlashCommands.RegisterCommands<TestCommand>(1079344320991215677);
+            SlashCommands.RegisterCommands<PlayCommand>();
             SlashCommands.RegisterCommands<CreateCommand>();
             SlashCommands.RegisterCommands<InfoCommand>();
 
