@@ -51,7 +51,13 @@ namespace EdaurodoBot.rsc.modules.musicmodule.commands
                     default:
                         return;
                 }
-                await _musicData.EnqueueMusicItem(new MusicItem(lavaresult.Tracks.First(), ctx.Member), ctx);
+
+                await _musicData.Enqueue(new MusicItem(lavaresult.Tracks.First(), ctx.Member));
+                await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(
+                EdaurodoUtilities.DiscordEmbedParse(new EdaurodoEmbed(
+                    description: $"🔮 **Adicionado:**  [`{_musicData.Queue.Last().Name}`]({_musicData.Queue.Last().Track.Uri.OriginalString})!"))));
+                await _musicData.CreatePlayerAsync(ctx.Member.VoiceState.Channel, ctx.Channel);
+                await _musicData.PlayAsync();
             }
             catch (Exception ex)
             {

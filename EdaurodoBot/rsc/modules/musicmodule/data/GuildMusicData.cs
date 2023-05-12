@@ -2,7 +2,6 @@
 using DSharpPlus.Entities;
 using DSharpPlus.Lavalink;
 using DSharpPlus.Lavalink.EventArgs;
-using DSharpPlus.SlashCommands;
 using EdaurodoBot.rsc.modules.musicmodule.enums;
 using EdaurodoBot.rsc.modules.musicmodule.services;
 using EdaurodoBot.rsc.utils;
@@ -12,63 +11,95 @@ namespace EdaurodoBot.rsc.modules.musicmodule.data
 {
     public sealed class GuildMusicData
     {
+
+        public LavalinkGuildConnection? Player { get; private set; }
+        public bool IsPlaying { get; private set; }
         public MusicItem? NowPlaying { get; private set; }
         public IReadOnlyCollection<MusicItem> Queue { get; private set; }
 
         private LavalinkService _lavalink;
         private List<MusicItem> _queueInternal;
 
-        private LavalinkGuildConnection? _player;
         private int _volume;
         private RepeatMode _repeatMode;
+        private DiscordMessage? _display;
         private DiscordChannel? _displayChannel;
-        private DiscordMessage? _displayMessage;
+
         public GuildMusicData(LavalinkService lavalink)
         {
             _lavalink = lavalink;
             _queueInternal = new List<MusicItem>();
             _volume = 100;
             _repeatMode = RepeatMode.None;
-            _displayMessage = null;
+            _display = null;
             _displayChannel = null;
 
+            Player = null;
+            IsPlaying = false;
             NowPlaying = null;
             Queue = new ReadOnlyCollection<MusicItem>(_queueInternal);
         }
-        public async Task EnqueueMusicItem(MusicItem item, InteractionContext ctx)
+
+        private async Task PauseAsync()
         {
-            lock (_queueInternal)
-            {
-                _queueInternal.Add(item);
-            }
-            if (!(_displayMessage is null)) { _displayMessage = await _displayMessage.ModifyAsync(GetDisplay()); }
-            await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(
-                EdaurodoUtilities.DiscordEmbedParse(new EdaurodoEmbed(
-                    author: new EdaurodoEmbedAuthor("Música adicionada na fila!", ctx.Guild.CurrentMember.AvatarUrl),
-                    fields: new List<EdaurodoEmbedField>() {
-                        new ("Música:",$"`#{Queue.Count}` - [`{Queue.Last().Name}`]({Queue.Last().Track.Uri.OriginalString})", true),
-                        new ("Duração:", $"`{Queue.Last().Track.Length:hh\\:mm\\:ss}`", true),
-                        new ("Requested by:",$"<@{ctx.Member.Id}>",true)
-                    }))));
-            await CreatePlayerAsync(ctx.Member.VoiceState.Channel, ctx.Channel);
-            await PlayAsync();
+            if (Player is null || !Player.IsConnected) { return; }
+            IsPlaying = false;
+            await Player.PauseAsync();
         }
-        private async Task CreatePlayerAsync(DiscordChannel playerChannel, DiscordChannel displayChannel)
+        private async Task ResumeAsync() {
+            if (Player is null || !Player.IsConnected) { return; }
+            IsPlaying = true;
+            await Player.ResumeAsync();
+        }
+        private async Task SkipAsync() { }
+        private async Task StopAsync() {
+            if (Player is null || !Player.IsConnected) { return; }
+            NowPlaying = null;
+            await Player.StopAsync();
+        }
+        private async Task SetVolumeAsync(int volume) {
+            if (Player is null || !Player.IsConnected) { return; }
+            _volume = volume;
+            await Player.SetVolumeAsync(_volume);
+        }
+        private void SetRepeatMode() { }
+
+        public async Task Enqueue(MusicItem music)
         {
-            if (!(_player is null) && _player.IsConnected) { return; }
+            lock (_queueInternal) { _queueInternal.Add(music); }
+            if (Player is not null && Player.IsConnected) { await UpdateOrCreateDisplay(); }
+        }
+        public async Task CreatePlayerAsync(DiscordChannel playerChannel, DiscordChannel displayChannel)
+        {
+            if (Player is not null && Player.IsConnected) { return; }
             _displayChannel = displayChannel;
-            _player = await _lavalink.Node.ConnectAsync(playerChannel);
-            if (_volume != 100) { await _player.SetVolumeAsync(100); }
-            _player.PlaybackFinished += Player_PlaybackFinished;
+            Player = await _lavalink.Node.ConnectAsync(playerChannel);
+            if (_volume != 100) { await Player.SetVolumeAsync(100); }
+            Player.PlaybackFinished += Player_PlaybackFinished;
         }
-        private async Task PlayAsync()
+        public async Task PlayAsync()
         {
-            if (_player == null || !_player.IsConnected) { return; }
+            if (Player is null || !Player.IsConnected) { return; }
             if (NowPlaying is null) { await PlaybackHandlerAsync(); }
+        }
+        private async Task PlaybackHandlerAsync()
+        {
+            var item = Dequeue();
+            if (item is null)
+            {
+                await DestroyPlayerAsync();
+                return;
+            }
+            NowPlaying = item;
+            _display?.DeleteAsync().GetAwaiter();
+            _display = await UpdateOrCreateDisplay();
+            await Player.PlayAsync(item.Track);
+            IsPlaying = true;
         }
         private MusicItem? Dequeue()
         {
             if (_queueInternal.Count == 0) { return null; }
+
             switch (_repeatMode)
             {
                 case RepeatMode.Single:
@@ -90,46 +121,27 @@ namespace EdaurodoBot.rsc.modules.musicmodule.data
                     }
             }
         }
-        private async Task PlaybackHandlerAsync()
-        {
-            var item = Dequeue();
-            if (item is null)
-            {
-                await DestroyPlayerAsync();
-                return;
-            }
-
-            NowPlaying = item;
-            _displayMessage = await UpdateOrCreateDisplay();
-            await _player.PlayAsync(item.Track);
-        }
         private async Task Player_PlaybackFinished(LavalinkGuildConnection node, TrackFinishEventArgs args)
         {
             await Task.Delay(500);
+            IsPlaying = false;
             await PlaybackHandlerAsync();
-        }
-        private void EmptyQueue()
-        {
-            lock (_queueInternal)
-            {
-                _queueInternal.Clear();
-            }
         }
         private async Task DestroyPlayerAsync()
         {
             NowPlaying = null;
-            if (!(_displayMessage is null))
+            if (_display is not null)
             {
-                await _displayMessage.DeleteAsync();
-                _displayMessage = null;
+                await _display.DeleteAsync();
+                _display = null;
             }
-            if (_player is null) { return; }
-            await _player.DisconnectAsync();
-            _player = null;
+            if (Player is null) { return; }
+            await Player.DisconnectAsync();
+            Player = null;
         }
         private async Task<DiscordMessage> UpdateOrCreateDisplay()
         {
-            if (!(_displayMessage is null)) { await _displayMessage.DeleteAsync(); }
+            if (_display is not null) { await _display.DeleteAsync(); }
             return await _displayChannel.SendMessageAsync(GetDisplay());
         }
         private DiscordMessageBuilder GetDisplay()
@@ -157,7 +169,7 @@ namespace EdaurodoBot.rsc.modules.musicmodule.data
                         new DiscordButtonComponent(
                             style: ButtonStyle.Secondary,
                             customId: "|",
-                            label: $"Repeat Mode: {repeatmode}",
+                            label: $"Repeat: {repeatmode}",
                             disabled: true,
                             emoji: null),
                         new DiscordButtonComponent(

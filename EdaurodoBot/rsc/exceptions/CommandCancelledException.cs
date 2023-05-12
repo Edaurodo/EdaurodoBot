@@ -1,4 +1,5 @@
 ﻿using DSharpPlus.Entities;
+using EdaurodoBot.rsc.utils;
 
 namespace EdaurodoBot.rsc.exceptions
 {
@@ -8,9 +9,9 @@ namespace EdaurodoBot.rsc.exceptions
         public CommandCancelledException(string message) : base(message) { }
         public CommandCancelledException(Exception innerException) : base("A execução do comando foi cancelado devido a criterios não atendidos", innerException) { }
         public CommandCancelledException(string messsage, Exception innerException) : base(messsage, innerException) { }
-        public CommandCancelledException(string message, DiscordInteraction interaction)
+        public CommandCancelledException(string message, DiscordInteraction interaction) : base(message)
         {
-            interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent(message)).GetAwaiter().GetResult();
+            interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().AddEmbed(EdaurodoUtilities.DiscordEmbedParse(new EdaurodoEmbed(description: $"> **{message}**")))).GetAwaiter().GetResult();
         }
     }
 }
