@@ -6,7 +6,6 @@ using EdaurodoBot.rsc.modules.musicmodule.data;
 using EdaurodoBot.rsc.modules.musicmodule.enums;
 using EdaurodoBot.rsc.modules.musicmodule.services;
 using EdaurodoBot.rsc.utils;
-using System.Security.AccessControl;
 
 namespace EdaurodoBot.rsc.modules.musicmodule.commands
 {

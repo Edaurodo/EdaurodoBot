@@ -184,10 +184,8 @@ namespace EdaurodoBot.rsc.modules.allowlistmodule.services
             Bot.Client.MessageCreated += Allowlist_MessageCreate;
             Bot.Client.GuildMemberUpdated += Allowlist_GuildMemberUpdated;
             Bot.Client.GuildMemberAdded += Allowlist_GuildMemberAdded;
-
             Bot.Client.ModalSubmitted += Allowlist_ModalSubmitted;
             Bot.Client.ComponentInteractionCreated += Allowlist_ComponentInteractionCreated;
-
             args.Guilds[Bot.Config.SecretConfig.GuildId].Channels[(ulong)Config.Channels.CategoryId].Children.ToList()
                 .FindAll(_ => _.Type == 0 && _.Id != (ulong)Config.Channels.MainId && _.Id != (ulong)Config.Channels.ApprovedId && _.Id != (ulong)Config.Channels.ReprovedId && _.Id != (ulong)Config.Channels.InterviewId && _.Id != (ulong)Config.Channels.ChangeNameId)
                 .ForEach(async _ => { await _.DeleteAsync(); });

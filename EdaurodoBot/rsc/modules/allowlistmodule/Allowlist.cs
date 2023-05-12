@@ -185,12 +185,7 @@ namespace EdaurodoBot.rsc.modules.allowlistmodule
 
                 await data.SubmitFinishAllowlistTime();
                 await SetRoleSentAllowlist(config, allowlist);
-
-                _ = Task.Run(async () =>
-                {
-                    await Task.Delay(30000);
-                    await DeleteChannelAsync(data.AllowlistUserChannel);
-                });
+                await DeleteChannelAsync(data.AllowlistUserChannel);
             }
             else
             {

@@ -8,7 +8,6 @@ using EdaurodoBot.rsc.modules.allowlistmodule.services;
 using EdaurodoBot.rsc.modules.genericmodule.commands.create;
 using EdaurodoBot.rsc.modules.musicmodule.services;
 using EdaurodoBot.rsc.core.config;
-using EdaurodoBot.rsc.utils.commands;
 using EdaurodoBot.rsc.modules.musicmodule.commands;
 
 namespace EdaurodoBot.rsc.core
